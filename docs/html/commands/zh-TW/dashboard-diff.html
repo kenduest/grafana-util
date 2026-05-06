@@ -941,7 +941,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 </div>
 <div class="command-intro-block">
   <p class="command-intro-label">什麼時候看這頁</p>
-  <ul class="command-intro-list"><li>當您想在匯入或發佈儀表板 bundle 之前先看出會變更哪些內容時，使用這個指令。</li></ul>
+  <ul class="command-intro-list"><li>當您想在匯入或釋出儀表板 bundle 之前先看出會變更哪些內容時，使用這個指令。</li></ul>
 </div>
 <div class="command-intro-block">
   <p class="command-intro-label">適合誰</p>
@@ -952,7 +952,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <h2 id="用途">用途</h2>
 <p>比較本地儀表板檔案與線上 Grafana 儀表板的差異。</p>
 <h2 id="何時使用">何時使用</h2>
-<p>當您想在匯入或發佈儀表板 bundle 之前先看出會變更哪些內容時，使用這個指令。</p>
+<p>當您想在匯入或釋出儀表板 bundle 之前先看出會變更哪些內容時，使用這個指令。</p>
 <h2 id="重點旗標">重點旗標</h2>
 <ul><li><code>--input-dir</code>：拿這個匯出目錄與 Grafana 比對。</li><li><code>--input-format</code>：選擇 <code>raw</code> 或 <code>provisioning</code>。</li><li><code>--local</code>、<code>--run</code>、<code>--run-id</code>：不傳 <code>--input-dir</code>，改拿 artifact workspace 的 dashboard lane 與 Grafana 比對。</li><li><code>--import-folder-uid</code>：覆寫比對時的目的資料夾 UID。</li><li><code>--context-lines</code>：統一 diff 的上下文行數。</li><li><code>--output-format</code>：選擇 <code>text</code> 或 <code>json</code>。</li></ul>
 <h2 id="範例">範例</h2>

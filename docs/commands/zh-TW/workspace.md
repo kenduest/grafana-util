@@ -2,7 +2,7 @@
 
 ## Root
 
-用途：針對本機 Grafana workspace 進行 scan、test、preview、package 與 apply。
+說明：針對本機 Grafana workspace 進行 scan、test、preview、package 與 apply。
 
 適用時機：當你手上已經有本機 repo root 或 staged package，想先看懂它、驗證它、預覽影響、打包交接，或在審核後套用它時。
 
@@ -38,26 +38,26 @@ grafana-util workspace apply --preview-file ./workspace-preview.json --approve -
 
 ## `scan`
 
-用途：找出本機 workspace 或 staged package 裡有哪些內容。
+說明：找出本機 workspace 或 staged package 裡有哪些內容。
 
 ## `test`
 
-用途：確認本機 workspace 在結構上是否可以繼續往下走。
+說明：確認本機 workspace 在結構上是否可以繼續往下走。
 
 ## `preview`
 
-用途：顯示目前 workspace 輸入會造成哪些變動。
+說明：顯示目前 workspace 輸入會造成哪些變動。
 
 ## `apply`
 
-用途：把已審核的 preview 轉成 staged 或 live apply 結果。不要用 live apply 覆蓋 Git Sync-managed 或 file-provisioned dashboard；請更新它的來源。
+說明：把已審核的 preview 轉成 staged 或 live apply 結果。不要用 live apply 覆蓋 Git Sync-managed 或 file-provisioned dashboard；請更新它的來源。
 
 ## `package`
 
-用途：把 dashboards、alerts、datasources 與 metadata 打包成一份可交接 artifact。
+說明：把 dashboards、alerts、datasources 與 metadata 打包成一份可交接 artifact。
 
 ## `ci`
 
-用途：提供給 CI 與自動化使用的低階 contract checks。
+說明：提供給 CI 與自動化使用的低階 contract checks。
 
 子命令：`summary`、`mark-reviewed`、`audit`、`input-test`、`alert-readiness`、`package-test`、`promote-test`。

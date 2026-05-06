@@ -937,7 +937,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <section class="command-intro">
   <div class="command-intro-grid"><div class="command-intro-block">
   <p class="command-intro-label">這頁在說什麼</p>
-  <p class="command-intro-text">透過 Grafana API 匯入 datasource inventory。</p>
+  <p class="command-intro-text">用 Grafana API 匯入 datasource inventory。</p>
 </div>
 <div class="command-intro-block">
   <p class="command-intro-label">什麼時候看這頁</p>
@@ -950,17 +950,17 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 </div>
 </section>
 <h2 id="用途">用途</h2>
-<p>透過 Grafana API 匯入 datasource inventory。</p>
+<p>用 Grafana API 匯入 datasource inventory。</p>
 <h2 id="何時使用">何時使用</h2>
 <p>當您有本地 dataworkspace package 或 provisioning 樹，想把它推進 Grafana，無論是實際執行或 dry run，都可以使用這個指令。</p>
 <h2 id="重點旗標">重點旗標</h2>
 <ul><li><code>--input-dir</code>：inventory 或 provisioning 輸入的來源路徑。</li><li><code>--input-format</code>：選擇 <code>inventory</code> 或 <code>provisioning</code>。</li><li><code>--org-id</code>、<code>--use-export-org</code>、<code>--only-org-id</code>、<code>--create-missing-orgs</code>：控制跨 org 路由。</li><li><code>--replace-existing</code>、<code>--update-existing-only</code>、<code>--require-matching-export-org</code>：匯入安全與重整控制。</li><li><code>--secret-values</code>：在匯入時解析佔位秘密值。</li><li><code>--secret-values-file</code>：從 JSON 檔提供佔位秘密值，供匯入時解析。</li><li><code>--dry-run</code>、<code>--table</code>、<code>--json</code>、<code>--output-format</code>、<code>--no-header</code>、<code>--output-columns</code>、<code>--list-columns</code>、<code>--progress</code>、<code>--verbose</code>：預覽與回報控制。若想看完整 dry-run 表格欄位，可用 <code>--output-columns all</code>。</li><li>dry-run 輸出可包含 <code>target_uid</code>、<code>target_version</code>、<code>target_read_only</code> 與 <code>blocked_reason</code>，讓 read-only 或 provisioned target 在 live import 前就可見。</li></ul>
 <h2 id="範例">範例</h2>
-<pre><code># 透過 Grafana API 匯入 datasource inventory。
+<pre><code># 用 Grafana API 匯入 datasource inventory。
 grafana-util datasource import --profile prod --input-dir ./datasources --dry-run --table</code></pre>
-<pre><code># 透過 Grafana API 匯入 datasource inventory。
+<pre><code># 用 Grafana API 匯入 datasource inventory。
 grafana-util datasource import --url http://localhost:3000 --basic-user admin --basic-password admin --input-dir ./datasources --use-export-org --only-org-id 2 --create-missing-orgs --dry-run --json</code></pre>
-<pre><code># 透過 Grafana API 匯入 datasource inventory。
+<pre><code># 用 Grafana API 匯入 datasource inventory。
 grafana-util datasource import --url http://localhost:3000 --token &quot;$GRAFANA_API_TOKEN&quot; --input-dir ./datasources --dry-run --table</code></pre>
 <h2 id="採用前後對照">採用前後對照</h2>
 <ul><li><strong>採用前</strong>：匯入 dataworkspace package 時，常常要先手動整理檔案、org 與 secrets，然後才敢碰 Grafana。</li><li><strong>採用後</strong>：一個匯入指令就能先預覽計畫、整理 org 路由，再用適當的保護機制推進 bundle。</li></ul>

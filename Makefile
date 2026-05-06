@@ -9,6 +9,7 @@ LIVE_TARGETS := seed-grafana-sample-data destroy-grafana-sample-data reset-grafa
 META_TARGETS := build
 
 .PHONY: $(VERSIONING_TARGETS) $(PYTHON_TARGETS) $(DOC_TARGETS) $(RUST_BUILD_TARGETS) $(INSTALLER_TARGETS) $(QUALITY_TARGETS) $(REPORT_TARGETS) $(LIVE_TARGETS) $(META_TARGETS)
+.DEFAULT_GOAL := help
 
 PYTHON ?= python3
 PIP ?= $(PYTHON) -m pip
@@ -33,12 +34,17 @@ define NL
 endef
 
 define HELP_TITLE
-$(BOLD)Available targets$(RESET)
+$(BOLD)Usage$(RESET)
+  $(GREEN)make$(RESET)              Show this help
+  $(GREEN)make help$(RESET)         Show this help
+  $(GREEN)make <target>$(RESET)     Run one target from the sections below
+
+$(BOLD)Targets by function$(RESET)
 
 endef
 
 define HELP_VERSIONING
-$(BLUE)$(BOLD)Versioning$(RESET)
+$(NL)$(BLUE)$(BOLD)Versioning:$(RESET)
   $(GREEN)make print-version$(RESET)  Show VERSION plus Python/Rust package versions
   $(GREEN)make sync-version$(RESET)  Sync python/pyproject.toml, rust/Cargo.toml, and rust/Cargo.lock from VERSION
   $(GREEN)make set-release-version VERSION=X.Y.Z$(RESET)  Set VERSION and package metadata to a release version
@@ -47,7 +53,7 @@ $(BLUE)$(BOLD)Versioning$(RESET)
 endef
 
 define HELP_PYTHON
-$(BLUE)$(BOLD)Python$(RESET)
+$(NL)$(BLUE)$(BOLD)Python:$(RESET)
   $(GREEN)make poetry-install$(RESET)  Install the Poetry-managed development environment
   $(GREEN)make poetry-lock$(RESET)  Refresh python/poetry.lock from python/pyproject.toml
   $(GREEN)make poetry-test$(RESET)  Run the Python unittest suite inside Poetry
@@ -57,7 +63,7 @@ $(BLUE)$(BOLD)Python$(RESET)
 endef
 
 define HELP_DOCS
-$(BLUE)$(BOLD)Docs$(RESET)
+$(NL)$(BLUE)$(BOLD)Docs:$(RESET)
   $(GREEN)make schema$(RESET)  Regenerate checked-in JSON Schema and schema-help artifacts from schemas/manifests/
   $(GREEN)make schema-check$(RESET)  Fail if checked-in schemas/jsonschema/ or schemas/help/ artifacts are out of date
   $(GREEN)make man$(RESET)  Regenerate grafana-util, dashboard, alert, datasource, access, profile, status, overview, change, and snapshot manpages
@@ -71,7 +77,7 @@ $(BLUE)$(BOLD)Docs$(RESET)
 endef
 
 define HELP_RUST_BUILD
-$(BLUE)$(BOLD)Rust build$(RESET)
+$(NL)$(BLUE)$(BOLD)Rust build:$(RESET)
   $(GREEN)make build-rust$(RESET)  Build the default native, host release artifact, and Linux amd64 Rust artifacts $(CYAN)(no browser feature)$(RESET)
   $(GREEN)make build-rust-browser$(RESET)  Build the browser-enabled native, host release artifact, and Linux amd64 Rust artifacts
   $(GREEN)make build-rust-native$(RESET)  Build the default native Rust release binary in rust/target/release/
@@ -87,7 +93,7 @@ $(BLUE)$(BOLD)Rust build$(RESET)
 endef
 
 define HELP_ARTIFACT_VALIDATION
-$(BLUE)$(BOLD)Artifact validation$(RESET)
+$(NL)$(BLUE)$(BOLD)Artifact validation:$(RESET)
   $(GREEN)make validate-rust-linux-amd64-artifact$(RESET)  Run the default Linux amd64 artifact in a fixed-name Linux Docker container
   $(GREEN)make validate-rust-linux-amd64-browser-artifact$(RESET)  Run the browser-enabled Linux amd64 artifact in a fixed-name Linux Docker container
   $(GREEN)make install-local$(RESET)  Build a local debug binary and install it through scripts/install.sh
@@ -97,7 +103,7 @@ $(BLUE)$(BOLD)Artifact validation$(RESET)
 endef
 
 define HELP_QUALITY
-$(BLUE)$(BOLD)Quality and tests$(RESET)
+$(NL)$(BLUE)$(BOLD)Quality and tests:$(RESET)
   $(GREEN)make test$(RESET)  Run the Rust test suite. Python is secondary and available through make test-python
   $(GREEN)make test-python$(RESET)  Run the Python unittest suite
   $(GREEN)make test-rust$(RESET)  Run the Rust cargo test suite
@@ -120,7 +126,7 @@ $(BLUE)$(BOLD)Quality and tests$(RESET)
 endef
 
 define HELP_LIVE
-$(BLUE)$(BOLD)Live smoke and sample data$(RESET)
+$(NL)$(BLUE)$(BOLD)Live smoke and sample data:$(RESET)
   $(GREEN)make seed-grafana-sample-data$(RESET)  Seed a local Grafana with reusable developer sample orgs, datasources, folders, and dashboards
   $(GREEN)make destroy-grafana-sample-data$(RESET)  Remove the developer sample orgs, datasources, folders, and dashboards seeded by the repo script
   $(GREEN)make reset-grafana-all-data$(RESET)  $(YELLOW)Danger:$(RESET) delete repo-relevant test data from a disposable local Grafana instance
@@ -135,7 +141,7 @@ $(BLUE)$(BOLD)Live smoke and sample data$(RESET)
 endef
 
 define HELP_META
-$(BLUE)$(BOLD)Meta$(RESET)
+$(NL)$(BLUE)$(BOLD)Meta:$(RESET)
   $(GREEN)make build$(RESET)  Build both Python and Rust artifacts
 endef
 

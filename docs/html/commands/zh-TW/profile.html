@@ -936,17 +936,13 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 
 <section class="command-intro">
   <div class="command-intro-grid"><div class="command-intro-block">
-  <p class="command-intro-label">這頁在說什麼</p>
-  <p class="command-intro-text">透過目前的 config profile 入口列出、檢視、驗證、新增與初始化 repo-local 的 grafana-util profile。</p>
-</div>
-<div class="command-intro-block">
   <p class="command-intro-label">適合誰</p>
   <p class="command-intro-text">適合想整理可重複連線預設、secret 處理與非互動式執行方式的人。</p>
 </div>
 </div>
 </section>
 <h2 id="root">Root</h2>
-<p>用途：透過目前的 <code>config profile</code> 入口列出、檢視、驗證、新增與初始化 repo-local 的 <code>grafana-util</code> profile。</p>
+<p>說明：用目前的 <code>config profile</code> 入口列出、檢視、驗證、新增與初始化 repo-local 的 <code>grafana-util</code> profile。</p>
 <p>適用時機：當你想把 Grafana 連線預設放在目前 checkout，之後再用 <code>--profile</code> 重複使用。</p>
 <p>說明：如果你想先理解整個 profile 工作流，再決定要進哪個子命令，先看這一頁最合適。這個指令群組是 repo-local 連線預設、secret 處理，以及本機與 CI 重複執行方式的入口。</p>
 <p>如果你要先理解 namespace 層級，而不是直接看某個 subcommand，先回 <a href="config.html">config</a>。</p>
@@ -976,7 +972,7 @@ grafana-util config profile example --mode full</code></pre>
 grafana-util config profile init --overwrite</code></pre>
 <p>相關指令：<code>grafana-util status live</code>、<code>grafana-util status overview</code>、<code>grafana-util workspace preview</code>、<code>grafana-util config profile current</code>、<code>grafana-util config profile validate</code>。</p>
 <h2 id="list"><code>list</code></h2>
-<p>用途：從解析後的 <code>grafana-util</code> 設定檔列出 profile 名稱。</p>
+<p>說明：從解析後的 <code>grafana-util</code> 設定檔列出 profile 名稱。</p>
 <p>適用時機：當你要確認目前 checkout 裡有哪些 profile 可用。</p>
 <p>主要旗標：除了共用的 root <code>--color</code> 之外，沒有其他旗標。</p>
 <p>範例：</p>
@@ -984,7 +980,7 @@ grafana-util config profile init --overwrite</code></pre>
 grafana-util config profile list</code></pre>
 <p>相關指令：<code>config profile show</code>、<code>config profile current</code>、<code>config profile add</code>、<code>config profile init</code>。</p>
 <h2 id="show"><code>show</code></h2>
-<p>用途：以 text、table、csv、json 或 yaml 顯示目前選定的 profile。</p>
+<p>說明：以 text、table、csv、json 或 yaml 顯示目前選定的 profile。</p>
 <p>適用時機：當你想在執行 live 指令前，先確認最後解析到的連線設定。</p>
 <p>主要旗標：</p>
 <ul><li><code>--profile</code></li><li><code>--output-format</code></li><li><code>--show-secrets</code></li></ul>
@@ -999,7 +995,7 @@ grafana-util config profile show --profile prod --show-secrets --output-format y
 <ul><li>預設會遮蔽秘密值。</li><li>加上 <code>--show-secrets</code> 才會顯示明文，或解出 secret-store 參照。</li></ul>
 <p>相關指令：<code>config profile list</code>、<code>config profile add</code>、<code>config profile current</code>、<code>config profile validate</code>、<code>status live</code>、<code>status overview</code>。</p>
 <h2 id="current"><code>current</code></h2>
-<p>用途：顯示目前選到的 profile、解析後的設定檔路徑、驗證模式與 secret 模式。</p>
+<p>說明：顯示目前選到的 profile、解析後的設定檔路徑、驗證模式與 secret 模式。</p>
 <p>適用時機：當你想在 live 指令執行前，先確認目前會使用哪個 repo-local profile。</p>
 <p>主要旗標：</p>
 <ul><li><code>--profile</code></li><li><code>--output-format</code></li></ul>
@@ -1012,7 +1008,7 @@ grafana-util config profile current --profile prod --output-format json</code></
 <ul><li>輸出只做診斷用途，不會揭露 secret。</li><li>如果設定檔不存在，<code>current</code> 會回報設定檔不存在，而不是直接失敗。</li></ul>
 <p>相關指令：<code>config profile show</code>、<code>config profile validate</code>、<code>status live</code>、<code>status overview</code>。</p>
 <h2 id="validate"><code>validate</code></h2>
-<p>用途：驗證所選 profile，並可選擇額外檢查 Grafana 可連通性。</p>
+<p>說明：驗證所選 profile，並可選擇額外檢查 Grafana 可連通性。</p>
 <p>適用時機：當你想在執行 live 指令前，先確認 profile 選擇、驗證形狀與 secret 解析是否正常。</p>
 <p>主要旗標：</p>
 <ul><li><code>--profile</code></li><li><code>--live</code></li><li><code>--output-format</code></li></ul>
@@ -1025,7 +1021,7 @@ grafana-util config profile validate --profile prod --live --output-format json<
 <ul><li><code>--live</code> 會在靜態驗證成功後，再額外呼叫 Grafana <code>/api/health</code>。</li><li>驗證不會輸出 secret。</li></ul>
 <p>相關指令：<code>config profile current</code>、<code>config profile show</code>、<code>status live</code>、<code>status overview</code>。</p>
 <h2 id="add"><code>add</code></h2>
-<p>用途：不用手改 <code>grafana-util.yaml</code>，直接建立或覆蓋一個命名 profile。</p>
+<p>說明：不用手改 <code>grafana-util.yaml</code>，直接建立或覆蓋一個命名 profile。</p>
 <p>適用時機：當你想更快建立可重用的連線設定，尤其是需要把驗證資訊一起記住時。</p>
 <p>主要旗標：</p>
 <ul><li><code>--url</code></li><li>驗證輸入：<code>--token</code>、<code>--token-env</code>、<code>--prompt-token</code>、<code>--basic-user</code>、<code>--basic-password</code>、<code>--password-env</code>、<code>--prompt-password</code></li><li>秘密保存模式：<code>--store-secret file|os|encrypted-file</code></li><li><code>encrypted-file</code> 相關：<code>--secret-file</code>、<code>--prompt-secret-passphrase</code>、<code>--secret-passphrase-env</code></li><li>行為控制：<code>--replace-existing</code>、<code>--set-default</code></li></ul>
@@ -1040,7 +1036,7 @@ grafana-util config profile add stage --url https://grafana-stage.example.com --
 <ul><li>預設 config path：<code>grafana-util.yaml</code></li><li>預設加密秘密檔：<code>.grafana-util.secrets.yaml</code></li><li><code>encrypted-file</code> 且未設 passphrase 時，預設本地 key file：<code>.grafana-util.secrets.key</code></li><li><code>config profile add --store-secret encrypted-file</code> 若 helper 檔位於 config 目錄樹內，會順手更新該目錄的 <code>.gitignore</code> 以忽略這些檔案。</li><li>這些預設 secret path 都是以 config file 所在目錄為基準，不是用臨時的 process cwd 去算。</li><li><code>file</code> 是預設模式。</li><li><code>os</code> 與 <code>encrypted-file</code> 都是明確 opt-in。</li><li><code>os</code> 模式會把 secret 放進 macOS Keychain 或 Linux Secret Service，而不是寫進 <code>grafana-util.yaml</code>。</li><li><code>os</code> 目前只支援 macOS 與 Linux；如果是 headless Linux shell，通常要改用 <code>password_env</code>、<code>token_env</code> 或 <code>encrypted-file</code>。</li><li>對重複執行的自動化工作，優先把秘密放進 profile 的 <code>password_env</code> 或 <code>token_env</code>，不要把秘密直接貼進每次 live 指令。</li></ul>
 <p>相關指令：<code>config profile show</code>、<code>config profile current</code>、<code>config profile example</code>、<code>config profile init</code>。</p>
 <h2 id="example"><code>example</code></h2>
-<p>用途：輸出一份帶完整註解的參考設定，方便直接拿來改。</p>
+<p>說明：輸出一份帶完整註解的參考設定，方便直接拿來改。</p>
 <p>適用時機：當你想看一份完整、可讀、可參考的 profile 設定範本，而不是只看零碎欄位說明。</p>
 <p>主要旗標：</p>
 <ul><li><code>--mode basic|full</code></li></ul>
@@ -1055,7 +1051,7 @@ grafana-util config profile example --mode full</code></pre>
 <ul><li><code>basic</code> 是較短的起手範本。</li><li><code>full</code> 會包含 <code>file</code>、<code>os</code>、<code>encrypted-file</code> 三種模式的註解示例。</li><li><code>os</code> 類型範例的前提是本機 macOS Keychain 或 Linux Secret Service 可用。</li></ul>
 <p>相關指令：<code>config profile add</code>、<code>config profile init</code>、<code>config profile show</code>、<code>config profile current</code>、<code>config profile validate</code>。</p>
 <h2 id="init"><code>init</code></h2>
-<p>用途：在目前工作目錄初始化 <code>grafana-util.yaml</code>。</p>
+<p>說明：在目前工作目錄初始化 <code>grafana-util.yaml</code>。</p>
 <p>適用時機：當某個 checkout 還沒有 repo-local profile 檔案，而你想先產生內建起手範本時。</p>
 <p>主要旗標：</p>
 <ul><li><code>--overwrite</code></li></ul>

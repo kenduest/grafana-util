@@ -2,7 +2,7 @@
 
 ## Root
 
-用途：透過目前的 `config profile` 入口列出、檢視、驗證、新增與初始化 repo-local 的 `grafana-util` profile。
+說明：用目前的 `config profile` 入口列出、檢視、驗證、新增與初始化 repo-local 的 `grafana-util` profile。
 
 適用時機：當你想把 Grafana 連線預設放在目前 checkout，之後再用 `--profile` 重複使用。
 
@@ -75,7 +75,7 @@ grafana-util config profile init --overwrite
 
 ## `list`
 
-用途：從解析後的 `grafana-util` 設定檔列出 profile 名稱。
+說明：從解析後的 `grafana-util` 設定檔列出 profile 名稱。
 
 適用時機：當你要確認目前 checkout 裡有哪些 profile 可用。
 
@@ -92,7 +92,7 @@ grafana-util config profile list
 
 ## `show`
 
-用途：以 text、table、csv、json 或 yaml 顯示目前選定的 profile。
+說明：以 text、table、csv、json 或 yaml 顯示目前選定的 profile。
 
 適用時機：當你想在執行 live 指令前，先確認最後解析到的連線設定。
 
@@ -126,7 +126,7 @@ grafana-util config profile show --profile prod --show-secrets --output-format y
 
 ## `current`
 
-用途：顯示目前選到的 profile、解析後的設定檔路徑、驗證模式與 secret 模式。
+說明：顯示目前選到的 profile、解析後的設定檔路徑、驗證模式與 secret 模式。
 
 適用時機：當你想在 live 指令執行前，先確認目前會使用哪個 repo-local profile。
 
@@ -154,7 +154,7 @@ grafana-util config profile current --profile prod --output-format json
 
 ## `validate`
 
-用途：驗證所選 profile，並可選擇額外檢查 Grafana 可連通性。
+說明：驗證所選 profile，並可選擇額外檢查 Grafana 可連通性。
 
 適用時機：當你想在執行 live 指令前，先確認 profile 選擇、驗證形狀與 secret 解析是否正常。
 
@@ -183,7 +183,7 @@ grafana-util config profile validate --profile prod --live --output-format json
 
 ## `add`
 
-用途：不用手改 `grafana-util.yaml`，直接建立或覆蓋一個命名 profile。
+說明：不用手改 `grafana-util.yaml`，直接建立或覆蓋一個命名 profile。
 
 適用時機：當你想更快建立可重用的連線設定，尤其是需要把驗證資訊一起記住時。
 
@@ -227,7 +227,7 @@ grafana-util config profile add stage --url https://grafana-stage.example.com --
 
 ## `example`
 
-用途：輸出一份帶完整註解的參考設定，方便直接拿來改。
+說明：輸出一份帶完整註解的參考設定，方便直接拿來改。
 
 適用時機：當你想看一份完整、可讀、可參考的 profile 設定範本，而不是只看零碎欄位說明。
 
@@ -260,7 +260,7 @@ grafana-util config profile example --mode full
 
 ## `init`
 
-用途：在目前工作目錄初始化 `grafana-util.yaml`。
+說明：在目前工作目錄初始化 `grafana-util.yaml`。
 
 適用時機：當某個 checkout 還沒有 repo-local profile 檔案，而你想先產生內建起手範本時。
 

@@ -937,7 +937,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <section class="command-intro">
   <div class="command-intro-grid"><div class="command-intro-block">
   <p class="command-intro-label">這頁在說什麼</p>
-  <p class="command-intro-text">透過 Grafana API 刪除一個線上 Grafana datasource。</p>
+  <p class="command-intro-text">用 Grafana API 刪除一個線上 Grafana datasource。</p>
 </div>
 <div class="command-intro-block">
   <p class="command-intro-label">什麼時候看這頁</p>
@@ -950,17 +950,17 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 </div>
 </section>
 <h2 id="用途">用途</h2>
-<p>透過 Grafana API 刪除一個線上 Grafana datasource。</p>
+<p>用 Grafana API 刪除一個線上 Grafana datasource。</p>
 <h2 id="何時使用">何時使用</h2>
 <p>當某個 datasource 應該被依 UID 或名稱移除時，無論是 dry run 或已確認的線上刪除，都可以使用這個指令。</p>
 <h2 id="重點旗標">重點旗標</h2>
 <ul><li><code>--uid</code>：要刪除的 datasource UID。</li><li><code>--name</code>：當沒有 UID 可用時，改用名稱刪除。</li><li><code>--yes</code>：確認這次線上刪除。</li><li><code>--dry-run</code>、<code>--table</code>、<code>--json</code>、<code>--output-format</code>、<code>--no-header</code>：預覽輸出控制。</li></ul>
 <h2 id="範例">範例</h2>
-<pre><code># 透過 Grafana API 刪除一個線上 Grafana datasource。
+<pre><code># 用 Grafana API 刪除一個線上 Grafana datasource。
 grafana-util datasource delete --profile prod --uid prom-main --dry-run --json</code></pre>
-<pre><code># 透過 Grafana API 刪除一個線上 Grafana datasource。
+<pre><code># 用 Grafana API 刪除一個線上 Grafana datasource。
 grafana-util datasource delete --url http://localhost:3000 --basic-user admin --basic-password admin --uid prom-main --yes</code></pre>
-<pre><code># 透過 Grafana API 刪除一個線上 Grafana datasource。
+<pre><code># 用 Grafana API 刪除一個線上 Grafana datasource。
 grafana-util datasource delete --url http://localhost:3000 --token &quot;$GRAFANA_API_TOKEN&quot; --uid prom-main --dry-run --json</code></pre>
 <h2 id="採用前後對照">採用前後對照</h2>
 <ul><li><strong>採用前</strong>：刪除 datasource 常常只能靠記憶 UI 裡的那一列，或是臨時手打名稱。</li><li><strong>採用後</strong>：一個指令就能以 UID 或名稱定位目標、先做 dry run，再明確執行 live 刪除。</li></ul>

@@ -893,7 +893,7 @@ dependencies = [
 
 [[package]]
 name = "grafana-utils-rust"
-version = "0.11.0"
+version = "0.12.0"
 dependencies = [
  "aes-gcm-siv",
  "base64",

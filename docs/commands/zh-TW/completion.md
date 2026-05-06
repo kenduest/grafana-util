@@ -2,7 +2,7 @@
 
 ## Root
 
-用途：從目前 `grafana-util` 指令樹產生 shell completion script。
+說明：從目前 `grafana-util` 指令樹產生 shell completion script。
 
 何時使用：
 - 你希望 Bash 或 Zsh 能補完 command、subcommand 與 flags

@@ -1042,12 +1042,12 @@ PREFLIGHT CHECK:
 }</code></pre>
 <p>想先了解變更包規模與形狀時，先跑 <code>workspace scan</code>；要確認 staged 輸入結構正確時，再跑 <code>workspace test</code>；最後才進入 alert-specific planning。</p>
 <h2 id="6-身份快照回放-access-management">6. 身份快照回放 (Access Management)</h2>
-<p>透過快照管理使用者、team 與 service account。</p>
-<pre><code># 透過快照管理使用者、team 與 service account。
+<p>用快照管理使用者、team 與 service account。</p>
+<pre><code># 用快照管理使用者、team 與 service account。
 grafana-util access user import --input-dir ./access-users --dry-run --table</code></pre>
-<pre><code># 透過快照管理使用者、team 與 service account。
+<pre><code># 用快照管理使用者、team 與 service account。
 grafana-util access service-account token add --service-account-id 15 --token-name nightly --seconds-to-live 3600 --json</code></pre>
-<pre><code># 透過快照管理使用者、team 與 service account。
+<pre><code># 用快照管理使用者、team 與 service account。
 grafana-util access service-account token delete --service-account-id 15 --token-name nightly --yes --json</code></pre>
 <p><strong>預期輸出：</strong></p>
 <pre><code>LOGIN       ROLE    ACTION   STATUS
@@ -1060,7 +1060,7 @@ ops-user    Viewer  create   missing
   &quot;secondsToLive&quot;: &quot;3600&quot;,
   &quot;key&quot;: &quot;eyJ...&quot;
 }</code></pre>
-<p>這個工作流是用來安全回放身分狀態的：先看 import dry-run，自動化憑證則透過 service account token 指令做輪替，不必再靠人工猜測目標帳號。</p>
+<p>這個工作流是用來安全回放身分狀態的：先看 import dry-run，自動化憑證則用 service account token 指令做輪替，不必再靠人工猜測目標帳號。</p>
 <p><a href="status-workspace.html">⬅️ 上一章：Workspace 審查與狀態</a> | <a href="index.html">🏠 回首頁</a> | <a href="reference.html">➡️ 下一章：技術參考手冊</a></p>
 <nav class="footer-nav"><a class="link-card" href="status-workspace.html"><span>上一章</span>Workspace 審查與狀態</a><a class="link-card" href="recipes.html"><span>下一章</span>實戰錦囊與最佳實踐</a></nav>
 </article>

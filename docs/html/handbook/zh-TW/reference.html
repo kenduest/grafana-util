@@ -1018,7 +1018,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <ol><li>CI 與自動化：優先用 <code>password_env</code> / <code>token_env</code></li><li>macOS 或 Linux 桌面上的日常維運：優先用 <code>os</code></li><li>需要在專案本地加密存放、但不想依賴 OS secret service：用 <code>encrypted-file</code></li><li><code>file</code> 明文模式只留給 demo、一次性 lab、或明確的 bootstrap 情境</li></ol>
 <h3 id="macos-與-linux-的-os-secret-store-支援">macOS 與 Linux 的 OS secret store 支援</h3>
 <p><code>os</code> provider 目前是平台後端：</p>
-<ul><li>macOS：透過系統 keyring 整合寫入 Keychain</li><li>Linux：透過系統 keyring 整合寫入 Secret Service</li></ul>
+<ul><li>macOS：用系統 keyring 整合寫入 Keychain</li><li>Linux：用系統 keyring 整合寫入 Secret Service</li></ul>
 <p>這樣 profile YAML 只會留下像這樣的 reference：</p>
 <pre><code>password_store:
   provider: os
@@ -1067,7 +1067,7 @@ profile:
 default_profile: dev
 
 profiles:
-  # 本機 demo profile，透過環境變數提供 Basic auth 密碼。
+  # 本機 demo profile，用環境變數提供 Basic auth 密碼。
   dev:
     url: http://127.0.0.1:3000
     username: admin

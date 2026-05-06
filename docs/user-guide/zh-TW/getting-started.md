@@ -96,7 +96,7 @@ curl -sSL https://raw.githubusercontent.com/kenduest-brobridge/grafana-util/main
 
 安裝腳本會優先使用您指定的 `BIN_DIR`。若沒有設定，會先嘗試可寫入的 `/usr/local/bin`，再退回 `$HOME/.local/bin`。
 
-如果最後選到的安裝目錄尚未加入 `PATH`，安裝腳本會直接印出對應 `zsh` 或 `bash` 可貼上的設定方式。`INSTALL_COMPLETION=auto` 會從 `SHELL` 偵測 `bash` 或 `zsh`；若想明確指定，請用 `INSTALL_COMPLETION=bash` 或 `INSTALL_COMPLETION=zsh`。互動模式下，若您已經透過 `BIN_DIR`、`INSTALL_COMPLETION` 或 `COMPLETION_DIR` 傳入值，installer 會視為已選好，不再重複詢問。若想先看完整安裝說明，也可以先執行：
+如果最後選到的安裝目錄尚未加入 `PATH`，安裝腳本會直接印出對應 `zsh` 或 `bash` 可貼上的設定方式。`INSTALL_COMPLETION=auto` 會從 `SHELL` 偵測 `bash` 或 `zsh`；若想明確指定，請用 `INSTALL_COMPLETION=bash` 或 `INSTALL_COMPLETION=zsh`。互動模式下，若您已經用 `BIN_DIR`、`INSTALL_COMPLETION` 或 `COMPLETION_DIR` 傳入值，installer 會視為已選好，不再重複詢問。若想先看完整安裝說明，也可以先執行：
 
 ```bash
 # 查看安裝腳本支援的參數、BIN_DIR 行為、completion 與 PATH 設定提醒。
@@ -295,7 +295,7 @@ profile:
 
 ## 步驟 3：初步唯讀檢查
 
-只要 Profile 設定檔已準備就緒，建議先透過唯讀指令確認行為，再進行資料異動作業。
+只要 Profile 設定檔已準備就緒，建議先用唯讀指令確認行為，再進行資料異動作業。
 
 ### 1. `status live` 入口
 ```bash

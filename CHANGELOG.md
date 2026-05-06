@@ -14,6 +14,41 @@ Format rule going forward:
 - keep older tagged releases below
 - use commit/tag history as the source of truth
 
+## [0.12.0] - 2026-05-06
+
+### Highlights
+
+- Dashboard review and apply workflows are safer around source ownership: API-managed dashboards keep the direct API lane, while Git Sync-managed and other managed paths surface clearer review evidence and stronger live-write guardrails.
+- Read-only status and review surfaces expose more useful provenance, ownership, and transport diagnostics, so operators can see why a route is blocked or degraded before attempting a live change.
+- Rust and secondary Python product surfaces are more balanced in the release line, with dashboard inspection parity and shared review/status adapters tightening cross-command consistency without changing the shipped CLI roots.
+
+### Added
+
+- Dashboard ownership and provenance evidence in review-oriented flows, including exported review layout coverage for Git Sync-managed dashboards.
+- Internal mutation review adapter consumption across more dry-run and plan surfaces so review-first outputs align better between workspace and domain commands.
+- Python parity for dashboard inspection workflows where the secondary implementation still needs to match the Rust-first CLI experience.
+
+### Changed
+
+- Dashboard import, plan, workspace, inspect, browse, governance, dependency, and query flows now route through clearer ownership-aware boundaries and smaller domain modules.
+- Live status collection and shared status aggregation were reworked so read-only diagnostics, row production, and review summaries stay more consistent across domains.
+- Alert runtime and datasource dry-run support were split into narrower maintainable boundaries without changing public command roots.
+- Maintainer backlog and architecture notes were refreshed to reflect the current post-`0.11.0` product-balance direction.
+
+### Fixed
+
+- Managed dashboard writes are now blocked more reliably in workspace and live-apply paths when the target should stay under Git Sync or other managed ownership.
+- Unsupported dashboard v2-shaped imports are rejected earlier instead of drifting deeper into the classic import lane.
+- Dashboard permission adjacency, plan warning behavior, library-panel live-only handling, and provisioning-derived semantics were tightened so review output better matches actual apply constraints.
+- Rust build scripts were repaired for the current maintainer workflow.
+- Datasource live writes now use UID-based APIs where required by newer Grafana behavior.
+
+### Migration Notes
+
+- `grafana-util` remains the shipped CLI name; this release line does not intentionally rename public command roots.
+- Operators should expect stricter direct-write blocking for managed dashboards. If review output shows Git Sync or other managed ownership, follow the repository or provisioning lane instead of forcing API apply.
+- Python remains secondary, but its dashboard inspection path is closer to the Rust-first review model in this release line.
+
 ## [0.11.0] - 2026-04-21
 
 ### Highlights

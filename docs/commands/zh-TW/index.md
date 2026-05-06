@@ -50,7 +50,7 @@ grafana-util --help-flat
 | 想把連線設定存起來，之後少打一堆參數 | [config](./config.md) | `config profile add/show/list` |
 | 想先備份或抓本地 inventory | [export](./export.md) | `export dashboard` / `alert` / `datasource` |
 | 想審查一包本地變更 | [workspace](./workspace.md) | `scan` -> `preview` -> `test` / `apply` |
-| 想處理 dashboard 的瀏覽、分析、草稿或發佈 | [dashboard](./dashboard.md) | `browse` / `summary` / `diff` / `publish` |
+| 想處理 dashboard 的瀏覽、分析、草稿或釋出 | [dashboard](./dashboard.md) | `browse` / `summary` / `diff` / `publish` |
 | 想處理 alert inventory 或 authoring | [alert](./alert.md) | `list-*` / `new-*` / `apply` |
 | 想處理 datasource inventory 或 lifecycle | [datasource](./datasource.md) | `list` / `export` / `diff` / `modify` |
 | 想管理 user、team、org 或 service account | [access](./access.md) | `user` / `team` / `org` / `service-account` |
@@ -62,7 +62,7 @@ grafana-util --help-flat
 | 起步與連線 | [version](./version.md)、[completion](./completion.md)、[status](./status.md)、[config](./config.md) | 驗證 binary、安裝 shell completion、檢查 live 狀態、保存 profile |
 | 匯出與離線成品 | [export](./export.md)、[snapshot bundles](./snapshot.md)、[resource queries](./resource.md) | 抓本地 inventory、做 snapshot、查單一資源 |
 | 本地審查工作區 | [workspace](./workspace.md) | scan、test、preview、package、apply |
-| Dashboard | [dashboard](./dashboard.md) | 瀏覽、分析、草稿、匯出匯入、發佈 |
+| Dashboard | [dashboard](./dashboard.md) | 瀏覽、分析、草稿、匯出匯入、釋出 |
 | Alert | [alert](./alert.md) | inventory、authoring、route、plan / apply |
 | Datasource | [datasource](./datasource.md) | inventory、類型查找、匯出匯入、live mutation |
 | Access | [access](./access.md) | user、org、team、service account、token |

@@ -937,7 +937,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <section class="command-intro">
   <div class="command-intro-grid"><div class="command-intro-block">
   <p class="command-intro-label">這頁在說什麼</p>
-  <p class="command-intro-text">透過 Grafana API 匯入儀表板 JSON 檔案。</p>
+  <p class="command-intro-text">用 Grafana API 匯入儀表板 JSON 檔案。</p>
 </div>
 <div class="command-intro-block">
   <p class="command-intro-label">什麼時候看這頁</p>
@@ -950,7 +950,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 </div>
 </section>
 <h2 id="用途">用途</h2>
-<p>透過 Grafana API 匯入儀表板 JSON 檔案。</p>
+<p>用 Grafana API 匯入儀表板 JSON 檔案。</p>
 <h2 id="何時使用">何時使用</h2>
 <p>當您手上有屬於 Grafana API 狀態管理的本地匯出樹，想把儀表板推回 Grafana，無論是實際執行或 dry run，都可以使用這個指令。這個指令只吃 <code>raw/</code> 或 <code>provisioning/</code> 輸入，不吃 Grafana UI 的 <code>prompt/</code> 路徑。</p>
 <p>不要用這個指令繞過來源管理。如果目標 dashboard 是 Grafana Git Sync 或 file provisioning 管理，應該修改 Git repository、PR 或 provisioning source，再由該流程部署，而不是強制走 dashboard API 匯入。</p>
@@ -961,13 +961,13 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <h2 id="成功判準">成功判準</h2>
 <ul><li>dry-run 先把 create/update 動作列清楚，再進入 live replay</li><li>dry-run 也會顯示目標 UID 的 live dashboard ownership evidence，包含 provisioned 或 managed-state 警告</li><li>目的 org 與 folder 路由足夠明確，可以先 review</li><li>這次匯入使用的是正確的輸入 lane：<code>raw</code> 或 <code>provisioning</code>，不是 <code>prompt</code></li><li>Git Sync 或 file-provisioned targets 會被視為 source-owned，應回到 repository 或 provisioning workflow 處理</li></ul>
 <h2 id="失敗時先檢查">失敗時先檢查</h2>
-<ul><li>如果 folder 或 org 落點不對，先檢查路由旗標，不要直接重跑 live import</li><li>如果看起來會刪或覆蓋太多，先停在 <code>--dry-run</code> 並回頭檢查匯出樹</li><li>如果 Grafana 回報目標 UID 是 provisioned 或 Git Sync-managed dashboard，不要改用直接 import 重試；請更新它的來源並透過原本 lane 重新部署</li><li>如果 schema 被擋下來，先確認來源資料是不是需要先正規化再匯入</li></ul>
+<ul><li>如果 folder 或 org 落點不對，先檢查路由旗標，不要直接重跑 live import</li><li>如果看起來會刪或覆蓋太多，先停在 <code>--dry-run</code> 並回頭檢查匯出樹</li><li>如果 Grafana 回報目標 UID 是 provisioned 或 Git Sync-managed dashboard，不要改用直接 import 重試；請更新它的來源並沿原本 lane 重新部署</li><li>如果 schema 被擋下來，先確認來源資料是不是需要先正規化再匯入</li></ul>
 <h2 id="範例">範例</h2>
-<pre><code># 透過 Grafana API 匯入儀表板 JSON 檔案。
+<pre><code># 用 Grafana API 匯入儀表板 JSON 檔案。
 grafana-util dashboard import --profile prod --input-dir ./dashboards/raw --replace-existing</code></pre>
-<pre><code># 透過 Grafana API 匯入儀表板 JSON 檔案。
+<pre><code># 用 Grafana API 匯入儀表板 JSON 檔案。
 grafana-util dashboard import --url http://localhost:3000 --basic-user admin --basic-password admin --input-dir ./dashboards/raw --dry-run --table</code></pre>
-<pre><code># 透過 Grafana API 匯入儀表板 JSON 檔案。
+<pre><code># 用 Grafana API 匯入儀表板 JSON 檔案。
 grafana-util dashboard import --url http://localhost:3000 --token &quot;$GRAFANA_API_TOKEN&quot; --input-dir ./dashboards/raw --dry-run --table</code></pre>
 <pre><code># 從最新的 profile artifact workspace dashboard run 做 dry-run import。
 grafana-util dashboard import --profile prod --local --dry-run --table</code></pre>

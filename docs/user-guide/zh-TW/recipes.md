@@ -82,7 +82,7 @@
 **解決方案**：匯入前先跑 **pre-import inspection**。
 
 ```bash
-# 解決方案：匯入前先跑 pre-import inspection。
+# 做法：匯入前先跑 pre-import inspection。
 grafana-util dashboard dependencies --input-dir ./backups/raw --input-format raw --output-format text
 ```
 

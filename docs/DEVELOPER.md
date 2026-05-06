@@ -137,6 +137,44 @@ make man
 make html
 ```
 
+## macOS To Linux amd64 Builds
+
+For macOS developers building the native Linux `amd64` Rust artifact without
+Docker, prepare the user-global toolchain first:
+
+```bash
+# Purpose: Install the non-Docker Linux amd64 build tools on macOS.
+brew install zig rustup
+export PATH="$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH"
+/opt/homebrew/opt/rustup/bin/rustup default stable
+/opt/homebrew/opt/rustup/bin/rustup target add x86_64-unknown-linux-gnu
+cargo install cargo-zigbuild
+```
+
+Homebrew `rustup` is keg-only because it conflicts with Homebrew `rust`. Put
+`/opt/homebrew/opt/rustup/bin` before `/opt/homebrew/bin` when running cross
+builds so `cargo` and `rustc` come from rustup. For future shells, add:
+
+```bash
+# Purpose: Prefer rustup-managed Rust commands for cross builds.
+export PATH="$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH"
+```
+
+Then run:
+
+```bash
+# Purpose: Build the default Linux amd64 Rust artifact.
+make build-rust-linux-amd64
+```
+
+The zig build script also prefers LLVM `llvm-ar` for Linux archives. If the
+local zig path fails or you want an isolated toolchain, use the Docker fallback:
+
+```bash
+# Purpose: Build the Linux amd64 Rust artifact in Docker.
+make build-rust-linux-amd64-docker
+```
+
 ## Maintenance Rules
 
 - Update Rust behavior and help text first; treat Python as legacy unless the

@@ -937,7 +937,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <section class="command-intro">
   <div class="command-intro-grid"><div class="command-intro-block">
   <p class="command-intro-label">這頁在說什麼</p>
-  <p class="command-intro-text">透過 Grafana API 匯入 alert 資源 JSON 檔。</p>
+  <p class="command-intro-text">用 Grafana API 匯入 alert 資源 JSON 檔。</p>
 </div>
 <div class="command-intro-block">
   <p class="command-intro-label">什麼時候看這頁</p>
@@ -950,7 +950,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 </div>
 </section>
 <h2 id="目的">目的</h2>
-<p>透過 Grafana API 匯入 alert 資源 JSON 檔。</p>
+<p>用 Grafana API 匯入 alert 資源 JSON 檔。</p>
 <h2 id="使用時機">使用時機</h2>
 <ul><li>在 Grafana 內重建已匯出的 alert 套件。</li><li>搭配 <code>--replace-existing</code> 更新既有的 alert 資源。</li><li>在真正變更前先預覽匯入動作。</li></ul>
 <h2 id="主要旗標">主要旗標</h2>
@@ -962,9 +962,9 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <h2 id="失敗時先檢查">失敗時先檢查</h2>
 <ul><li><code>--input-dir</code> 要指向 <code>raw/</code> 目錄，不要只指到上層匯出資料夾。</li><li>如果 dashboard 連動規則有搬動，匯入前先補上 dashboard / panel 對應表。</li><li>需要覆蓋既有資源時，記得加 <code>--replace-existing</code>。</li></ul>
 <h2 id="範例">範例</h2>
-<pre><code># 透過 Grafana API 匯入 alert 資源 JSON 檔。
+<pre><code># 用 Grafana API 匯入 alert 資源 JSON 檔。
 grafana-util alert import --url http://localhost:3000 --input-dir ./alerts/raw --replace-existing</code></pre>
-<pre><code># 透過 Grafana API 匯入 alert 資源 JSON 檔。
+<pre><code># 用 Grafana API 匯入 alert 資源 JSON 檔。
 grafana-util alert import --url http://localhost:3000 --input-dir ./alerts/raw --replace-existing --dry-run --json</code></pre>
 <h2 id="相關命令">相關命令</h2>
 <ul><li><a href="alert.html">alert</a></li><li><a href="alert-export.html">alert export</a></li><li><a href="alert-diff.html">alert diff</a></li></ul>

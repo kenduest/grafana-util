@@ -27,7 +27,7 @@
 - 預設只修 `raw/` 與 `prompt/`。
 - `provisioning/` 會刻意維持不變。
 - `raw/folders.json` 是 folder path 的依據。
-- prompt 修復會透過相同 dashboard UID 找 raw dashboard 取得 folder identity。
+- prompt 修復會用相同 dashboard UID 找 raw dashboard 取得 folder identity。
 - 當 raw dashboard JSON 沒有 `meta.folderUid` 時，只有在 root export index 的 `folderTitle` 對同一 org 於 `raw/folders.json` 內唯一時，才會用該 folder title 回推。
 - metadata 不足時會標成 blocked，不會猜路徑。
 - text output 預設只顯示 summary。需要逐筆 dashboard operation 時，加上 `--show-operations`。

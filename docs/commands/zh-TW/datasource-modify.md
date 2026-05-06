@@ -1,7 +1,7 @@
 # datasource modify
 
 ## 用途
-透過 Grafana API 修改一個線上 Grafana datasource。
+用 Grafana API 修改一個線上 Grafana datasource。
 
 ## 何時使用
 當某個 datasource 已經存在，而您需要更新它的 URL、驗證、JSON payload 或其他線上設定時，使用這個指令。
@@ -19,12 +19,12 @@
 
 ## 範例
 ```bash
-# 透過 Grafana API 修改一個線上 Grafana datasource。
+# 用 Grafana API 修改一個線上 Grafana datasource。
 grafana-util datasource modify --url http://localhost:3000 --token "$GRAFANA_API_TOKEN" --uid prom-main --set-url http://prometheus-v2:9090 --dry-run --json
 ```
 
 ```bash
-# 透過 Grafana API 修改一個線上 Grafana datasource。
+# 用 Grafana API 修改一個線上 Grafana datasource。
 grafana-util datasource modify --url http://localhost:3000 --token "$GRAFANA_API_TOKEN" --uid prom-main --set-default true --dry-run --table
 ```
 

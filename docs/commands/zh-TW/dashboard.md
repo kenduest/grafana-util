@@ -9,7 +9,7 @@
 | 想知道某個 datasource 會牽動哪些 dashboard 或 alert | [dashboard impact](./dashboard-impact.md) | 先看變更影響面，避免直接動 live |
 | 想比對草稿與 live 差異 | [dashboard diff](./dashboard-diff.md) / [dashboard review](./dashboard-review.md) | 先做 review，再決定是否 publish |
 | 想先看本地匯出樹套到 live 會改什麼 | [dashboard plan](./dashboard-plan.md) | 先產生 create/update/delete/review hints，再決定是否 import |
-| 想做本地草稿與發佈 | [dashboard get](./dashboard-get.md) / [dashboard clone](./dashboard-clone.md) / [dashboard publish](./dashboard-publish.md) | 先進 authoring 路徑，不要直接在 live 上亂改 |
+| 想做本地草稿與釋出 | [dashboard get](./dashboard-get.md) / [dashboard clone](./dashboard-clone.md) / [dashboard publish](./dashboard-publish.md) | 先進 authoring 路徑，不要直接在 live 上亂改 |
 | 想補事故、報告或交接素材 | [dashboard screenshot](./dashboard-screenshot.md) | 先拿可重現的視覺證據 |
 
 ## 這個入口是做什麼的
@@ -57,11 +57,11 @@
 ## 採用前後對照
 
 - **採用前**：dashboard 動作常分散在 UI、草稿 JSON 與臨時 shell 指令裡，要回頭重跑很麻煩。
-- **採用後**：同一條命令群組就能把瀏覽、草稿、檢查、發佈與素材產生串起來。
+- **採用後**：同一條命令群組就能把瀏覽、草稿、檢查、釋出與素材產生串起來。
 
 ## 成功判準
 
-- 你能在開始前就判斷這次是要看 live、做草稿、跑檢查，還是直接發佈
+- 你能在開始前就判斷這次是要看 live、做草稿、跑檢查，還是直接釋出
 - export / summary / diff 的產物能互相對得起來，不會換個步驟就失去上下文
 - 需要交給 review 或 CI 時，可以把 dependencies / impact / policy 的結果拿去重跑
 
@@ -146,7 +146,7 @@ grafana-util dashboard edit-live --profile prod --dashboard-uid cpu-main --outpu
 - [dashboard impact](./dashboard-impact.md)
 - [dashboard policy](./dashboard-policy.md)
 
-### 編修與發佈
+### 編修與釋出
 
 - [dashboard get](./dashboard-get.md)
 - [dashboard clone](./dashboard-clone.md)

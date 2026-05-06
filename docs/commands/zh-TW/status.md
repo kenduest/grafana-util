@@ -2,7 +2,7 @@
 
 ## Root
 
-用途：透過單一 status surface 讀取 live 與 staged 的 Grafana 狀態。
+說明：用單一 status surface 讀取 live 與 staged 的 Grafana 狀態。
 
 適用時機：當你想看 readiness、overview、snapshot，或直接讀 live 資料，但還不想進 mutation 流程時。
 
@@ -25,7 +25,7 @@ grafana-util status overview live --url http://localhost:3000 --basic-user admin
 
 ## `live`
 
-用途：從 Grafana live read surface 產生 readiness 視圖。
+說明：從 Grafana live read surface 產生 readiness 視圖。
 
 JSON/YAML 輸出會包含共用 project status contract：`kind`、`schemaVersion`、
 `toolVersion`、`scope`、`overall`、`domains`、`topBlockers`、`nextActions`。

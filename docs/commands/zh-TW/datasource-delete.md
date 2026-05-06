@@ -1,7 +1,7 @@
 # datasource delete
 
 ## 用途
-透過 Grafana API 刪除一個線上 Grafana datasource。
+用 Grafana API 刪除一個線上 Grafana datasource。
 
 ## 何時使用
 當某個 datasource 應該被依 UID 或名稱移除時，無論是 dry run 或已確認的線上刪除，都可以使用這個指令。
@@ -14,17 +14,17 @@
 
 ## 範例
 ```bash
-# 透過 Grafana API 刪除一個線上 Grafana datasource。
+# 用 Grafana API 刪除一個線上 Grafana datasource。
 grafana-util datasource delete --profile prod --uid prom-main --dry-run --json
 ```
 
 ```bash
-# 透過 Grafana API 刪除一個線上 Grafana datasource。
+# 用 Grafana API 刪除一個線上 Grafana datasource。
 grafana-util datasource delete --url http://localhost:3000 --basic-user admin --basic-password admin --uid prom-main --yes
 ```
 
 ```bash
-# 透過 Grafana API 刪除一個線上 Grafana datasource。
+# 用 Grafana API 刪除一個線上 Grafana datasource。
 grafana-util datasource delete --url http://localhost:3000 --token "$GRAFANA_API_TOKEN" --uid prom-main --dry-run --json
 ```
 

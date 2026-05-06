@@ -34,13 +34,13 @@
 ## Datasource 解析
 - `infer-family` 是預設且實務上最常用的模式。它可以從 query shape 修補 Prometheus、Loki、Flux/Influx 等較明確的 family。
 - `exact` 需要從嵌入資料、raw inventory 或 `--datasource-map` 找到精確 datasource。
-- `exact` 也可以透過可選的 live datasource lookup 成功，只要你提供 `--profile` 或直接 live auth。
+- `exact` 也可以用可選的 live datasource lookup 成功，只要你提供 `--profile` 或直接 live auth。
 - `strict` 則會在任何 datasource 無法精確解析時立刻失敗。
 - 若同一份 dashboard 裡有多個可區分的 datasource 參照，命令會保留多個 prompt slot，而不是只按 family 合併。
 - 像 generic SQL/search/tracing 這類較模糊的 family，仍然需要更好的原始資料或明確的 `--datasource-map`。
 
 ## Placeholder 模型
-- `$datasource` 是 dashboard variable 參照，表示 dashboard 或 panel 是透過名為 `datasource` 的 Grafana 變數來選 datasource。
+- `$datasource` 是 dashboard variable 參照，表示 dashboard 或 panel 是用名為 `datasource` 的 Grafana 變數來選 datasource。
 - `${DS_PROMETHEUS}` 或 `${DS_*}` 是 external-import input placeholder，表示 Grafana 在 `Upload JSON` 時要先詢問 datasource，再把結果注入 dashboard。
 - 這兩者有關聯，但不是同一件事。生成後的 prompt 檔可以同時包含：
 - `__inputs` 裡的 `${DS_*}` 與某些 typed datasource 參照

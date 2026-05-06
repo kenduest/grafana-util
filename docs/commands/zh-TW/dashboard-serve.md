@@ -1,7 +1,7 @@
 # dashboard serve
 
 ## 用途
-透過輕量本地 preview server 提供一份或多份 dashboard 草稿。
+用輕量本地 preview server 提供一份或多份 dashboard 草稿。
 
 ## 何時使用
 當你正在反覆編修單一 dashboard 草稿、草稿目錄，或外部 generator 輸出，想先在本地瀏覽器檢視內容，而不是每次都直接 publish 回 Grafana 時，使用這個指令。

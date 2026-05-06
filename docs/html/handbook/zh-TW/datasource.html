@@ -941,14 +941,14 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <ul><li>負責 data source 盤點、同步與恢復的人</li><li>需要把 data source 資產接進 Git 或 provisioning 流程的人</li><li>需要先做 dry-run，再決定要不要套用的人</li></ul>
 <h2 id="主要目標">主要目標</h2>
 <ul><li>先看懂 live data source 或本地 bundle 長什麼樣</li><li>再建立可回放的輸出樹</li><li>最後才進行匯入、修改或刪除</li></ul>
-<p>好的 data source 流程應該讓你在變更前就知道三件事：誰引用它、哪些欄位可以安全留存、哪些 secret 必須透過恢復機制補回。</p>
+<p>好的 data source 流程應該讓你在變更前就知道三件事：誰引用它、哪些欄位可以安全留存、哪些 secret 必須用恢復機制補回。</p>
 <h2 id="採用前後對照">採用前後對照</h2>
 <ul><li>以前：data source 變更常被當成單次設定修改，回復方式與還原層級不夠清楚。</li><li>現在：先盤點、再做遮蔽式還原、再投影到 provisioning，最後才做 dry-run 或實際變更。</li></ul>
 <h2 id="成功判準">成功判準</h2>
 <ul><li>你知道哪些欄位要放進恢復包，哪些欄位一定要遮蔽。</li><li>你能先確認 live inventory 或本地匯出 bundle，再決定要不要動它。</li><li>你能分清楚自己是在處理 recovery、provisioning，還是直接 live mutation。</li></ul>
 <h2 id="失敗時先檢查">失敗時先檢查</h2>
 <ul><li>如果回放包裡出現明文 secret，先停下來修匯出路徑，不要先存檔。</li><li>如果匯入預覽跟你以為的 live data source 對不上，先檢查 UID 與 type mapping。</li><li>如果 provisioning 投影跟恢復包不一致，先確認你到底要的是哪一條 lane。</li></ul>
-<p>&gt; <strong>維運目標</strong>：確保 data source 設定可以安全地備份、比對與回放，並透過 <strong>Masked Recovery（遮蔽式還原）</strong> 保護敏感憑證。</p>
+<p>&gt; <strong>維運目標</strong>：確保 data source 設定可以安全地備份、比對與回放，並用 <strong>Masked Recovery（遮蔽式還原）</strong> 保護敏感憑證。</p>
 <h2 id="data-source-工作流地圖">Data source 工作流地圖</h2>
 <p>Data source 子命令的差異，主要在於它讀的是 live Grafana、本地 bundle，還是準備要寫回 live：</p>
 <table><thead><tr><th>任務</th><th>起點</th><th>主要輸入</th><th>主要輸出</th><th>下一步</th></tr></thead><tbody><tr><td>確認支援型別</td><td><code>types</code></td><td>CLI 內建型別表</td><td>type 與必要欄位</td><td>決定 add / modify 欄位</td></tr><tr><td>盤點 live 或本地 bundle</td><td><code>list</code>, <code>browse</code></td><td>live Grafana 或 <code>--input-dir</code></td><td>UID、type、URL、default 狀態</td><td>export、diff 或 review</td></tr><tr><td>備份與恢復</td><td><code>export</code>, <code>import</code></td><td>live Grafana 或 <code>datasources.json</code></td><td>masked recovery bundle / dry-run</td><td>dry-run 後 import</td></tr><tr><td>比對漂移</td><td><code>diff</code></td><td>本地 bundle + live Grafana</td><td>create / update / delete 差異</td><td>修 bundle 或 import</td></tr><tr><td>直接 live 變更</td><td><code>add</code>, <code>modify</code>, <code>delete</code></td><td>flags + live Grafana</td><td>dry-run 或 mutation 結果</td><td>list / diff 後驗證</td></tr><tr><td>產生 provisioning 投影</td><td><code>export</code></td><td>live Grafana</td><td><code>provisioning/datasources.yaml</code></td><td>交給 Grafana provisioning lane</td></tr></tbody></table>

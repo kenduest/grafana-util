@@ -15,6 +15,8 @@ VERBOSE="${VERBOSE:-0}"
 BUILD_BROWSER="${BUILD_BROWSER:-0}"
 ZIG_RELEASE_LTO="${ZIG_RELEASE_LTO:-off}"
 
+export PATH="${HOME}/.cargo/bin:/opt/homebrew/opt/rustup/bin:${PATH}"
+
 require_tool() {
   local tool_name="$1"
   local reason="$2"
@@ -47,7 +49,11 @@ configure_archive_tool() {
   local ar_tool="${ZIGBUILD_AR:-}"
 
   if [[ -z "${ar_tool}" ]]; then
-    ar_tool="$(command -v ar || true)"
+    ar_tool="$(command -v llvm-ar || true)"
+  fi
+
+  if [[ -z "${ar_tool}" && -x "/opt/homebrew/opt/llvm/bin/llvm-ar" ]]; then
+    ar_tool="/opt/homebrew/opt/llvm/bin/llvm-ar"
   fi
 
   if [[ -n "${ar_tool}" ]]; then
@@ -102,8 +108,6 @@ main() {
 
   require_tool "zig" "non-Docker Linux amd64 Rust builds"
   require_tool "cargo-zigbuild" "non-Docker Linux amd64 Rust builds"
-
-  export PATH="${HOME}/.cargo/bin:${PATH}"
 
   output_dir="$(resolve_output_dir)"
   flavor_label="$(build_flavor_label)"

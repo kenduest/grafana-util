@@ -209,20 +209,20 @@ PREFLIGHT CHECK:
 
 ## 6. 身份快照回放 (Access Management)
 
-透過快照管理使用者、team 與 service account。
+用快照管理使用者、team 與 service account。
 
 ```bash
-# 透過快照管理使用者、team 與 service account。
+# 用快照管理使用者、team 與 service account。
 grafana-util access user import --input-dir ./access-users --dry-run --table
 ```
 
 ```bash
-# 透過快照管理使用者、team 與 service account。
+# 用快照管理使用者、team 與 service account。
 grafana-util access service-account token add --service-account-id 15 --token-name nightly --seconds-to-live 3600 --json
 ```
 
 ```bash
-# 透過快照管理使用者、team 與 service account。
+# 用快照管理使用者、team 與 service account。
 grafana-util access service-account token delete --service-account-id 15 --token-name nightly --yes --json
 ```
 **預期輸出：**
@@ -238,7 +238,7 @@ ops-user    Viewer  create   missing
   "key": "eyJ..."
 }
 ```
-這個工作流是用來安全回放身分狀態的：先看 import dry-run，自動化憑證則透過 service account token 指令做輪替，不必再靠人工猜測目標帳號。
+這個工作流是用來安全回放身分狀態的：先看 import dry-run，自動化憑證則用 service account token 指令做輪替，不必再靠人工猜測目標帳號。
 
 ---
 [⬅️ 上一章：Workspace 審查與狀態](status-workspace.md) | [🏠 回首頁](index.md) | [➡️ 下一章：技術參考手冊](reference.md)

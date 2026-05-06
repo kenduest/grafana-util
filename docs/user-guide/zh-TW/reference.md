@@ -222,8 +222,8 @@ Profile 是專案本地的設定。`grafana-util config profile` 會讀寫目前
 
 `os` provider 目前是平台後端：
 
-- macOS：透過系統 keyring 整合寫入 Keychain
-- Linux：透過系統 keyring 整合寫入 Secret Service
+- macOS：用系統 keyring 整合寫入 Keychain
+- Linux：用系統 keyring 整合寫入 Secret Service
 
 這樣 profile YAML 只會留下像這樣的 reference：
 
@@ -321,7 +321,7 @@ profile:
 default_profile: dev
 
 profiles:
-  # 本機 demo profile，透過環境變數提供 Basic auth 密碼。
+  # 本機 demo profile，用環境變數提供 Basic auth 密碼。
   dev:
     url: http://127.0.0.1:3000
     username: admin

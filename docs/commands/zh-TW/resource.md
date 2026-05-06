@@ -1,7 +1,7 @@
 # `grafana-util status resource`
 
 ## 用途
-透過通用、唯讀的查詢介面讀取少數幾種 live Grafana 資源。
+用通用、唯讀的查詢介面讀取少數幾種 live Grafana 資源。
 
 ## 何時使用
 當你需要先做唯讀的 live lookup，但 `dashboard`、`alert`、`datasource`、`access`、`workspace` 還沒有對應的高階工作流時，可以先用這個命名空間。

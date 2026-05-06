@@ -1,7 +1,7 @@
 # dashboard import
 
 ## 用途
-透過 Grafana API 匯入儀表板 JSON 檔案。
+用 Grafana API 匯入儀表板 JSON 檔案。
 
 ## 何時使用
 當您手上有屬於 Grafana API 狀態管理的本地匯出樹，想把儀表板推回 Grafana，無論是實際執行或 dry run，都可以使用這個指令。這個指令只吃 `raw/` 或 `provisioning/` 輸入，不吃 Grafana UI 的 `prompt/` 路徑。
@@ -33,22 +33,22 @@
 ## 失敗時先檢查
 - 如果 folder 或 org 落點不對，先檢查路由旗標，不要直接重跑 live import
 - 如果看起來會刪或覆蓋太多，先停在 `--dry-run` 並回頭檢查匯出樹
-- 如果 Grafana 回報目標 UID 是 provisioned 或 Git Sync-managed dashboard，不要改用直接 import 重試；請更新它的來源並透過原本 lane 重新部署
+- 如果 Grafana 回報目標 UID 是 provisioned 或 Git Sync-managed dashboard，不要改用直接 import 重試；請更新它的來源並沿原本 lane 重新部署
 - 如果 schema 被擋下來，先確認來源資料是不是需要先正規化再匯入
 
 ## 範例
 ```bash
-# 透過 Grafana API 匯入儀表板 JSON 檔案。
+# 用 Grafana API 匯入儀表板 JSON 檔案。
 grafana-util dashboard import --profile prod --input-dir ./dashboards/raw --replace-existing
 ```
 
 ```bash
-# 透過 Grafana API 匯入儀表板 JSON 檔案。
+# 用 Grafana API 匯入儀表板 JSON 檔案。
 grafana-util dashboard import --url http://localhost:3000 --basic-user admin --basic-password admin --input-dir ./dashboards/raw --dry-run --table
 ```
 
 ```bash
-# 透過 Grafana API 匯入儀表板 JSON 檔案。
+# 用 Grafana API 匯入儀表板 JSON 檔案。
 grafana-util dashboard import --url http://localhost:3000 --token "$GRAFANA_API_TOKEN" --input-dir ./dashboards/raw --dry-run --table
 ```
 

@@ -14,7 +14,7 @@
 ## 重點旗標
 - `--dashboard-uid` 或 `--dashboard-url`：選擇要擷取的儀表板。
 - `--output`：截圖輸出目的檔。
-- `--panel-id`：透過 solo 路由只擷取單一面板。
+- `--panel-id`：用 solo 路由只擷取單一面板。
 - `--vars-query` 與 `--var`：把變數狀態帶入擷取。
 - `--full-page` 與 `--full-page-output`：擷取整個可捲動頁面或平鋪輸出。
 - `--header-title`、`--header-url`、`--header-captured-at`、`--header-text`：為 PNG 或 JPEG 加上標頭。

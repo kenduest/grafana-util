@@ -2,7 +2,7 @@
 
 ## Root
 
-用途：說明 `grafana-util config` 這個 namespace 是做什麼的、什麼時候停在 root 看整體設定模型，以及什麼時候該進 `config profile`。
+說明：`grafana-util config` 這個 namespace 是做什麼的、什麼時候停在 root 看整體設定模型，以及什麼時候該進 `config profile`。
 
 適用時機：
 - 當你要先理解設定模型，再決定要進哪個 profile 子命令

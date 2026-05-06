@@ -18,11 +18,11 @@
 這個工具來自我自己在 Grafana 專案裡反覆遇到的幾種情境：
 
 1. Dashboard 常常先在 Lab 或本機 Grafana 開發，完成後還需要匯出到其他環境重複使用。
-2. Dashboard 的修改方式不一定只在 Grafana Web UI 裡完成，有時也會透過 AI Agent 直接修改本地 Grafana JSON。
+2. Dashboard 的修改方式不一定只在 Grafana Web UI 裡完成，有時也會由 AI Agent 直接修改本地 Grafana JSON。
 3. 客戶環境裡有許多 Dashboard 需要匯出、調整後再匯入；比較安全的做法，是先匯入到本機開發環境確認。
 4. 維運時常需要盤點 Dashboard 使用了哪些 Data Source，也需要了解目前有哪些 user、team、帳號群組與權限設定。
 
-Grafana 本身對 Dashboard Developer、SRE 或內部使用者來說，還沒有把這些流程整理成一個方便操作的工具。`grafana-state-kit` 就是為了透過 `grafana-util` CLI 補上這段日常維運與開發流程而做的。
+Grafana 本身對 Dashboard Developer、SRE 或內部使用者來說，還沒有把這些流程整理成一個方便操作的工具。`grafana-state-kit` 就是為了用 `grafana-util` CLI 補上這段日常維運與開發流程而做的。
 
 ## 採用前後對照
 

@@ -936,17 +936,13 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 
 <section class="command-intro">
   <div class="command-intro-grid"><div class="command-intro-block">
-  <p class="command-intro-label">這頁在說什麼</p>
-  <p class="command-intro-text">透過單一 status surface 讀取 live 與 staged 的 Grafana 狀態。</p>
-</div>
-<div class="command-intro-block">
   <p class="command-intro-label">適合誰</p>
   <p class="command-intro-text">適合想在動手前先做 live 或 staged readiness 檢查的人。</p>
 </div>
 </div>
 </section>
 <h2 id="root">Root</h2>
-<p>用途：透過單一 status surface 讀取 live 與 staged 的 Grafana 狀態。</p>
+<p>說明：用單一 status surface 讀取 live 與 staged 的 Grafana 狀態。</p>
 <p>適用時機：當你想看 readiness、overview、snapshot，或直接讀 live 資料，但還不想進 mutation 流程時。</p>
 <p>說明：<code>status</code> 是給使用者看的唯讀入口。<code>live</code> 用來做即時 gate，<code>staged</code> 用來看本機 artifact，<code>overview</code> 用來看全域摘要，<code>snapshot</code> 用來看 bundle 風格的 review，<code>resource</code> 則用來直接讀 live resource。</p>
 <p>範例：</p>
@@ -960,7 +956,7 @@ grafana-util status overview --dashboard-export-dir ./dashboards/raw --alert-exp
 grafana-util status overview live --url http://localhost:3000 --basic-user admin --basic-password admin --output-format interactive</code></pre>
 <p>相關指令：<code>grafana-util export</code>、<code>grafana-util workspace</code>、<code>grafana-util config profile</code>。</p>
 <h2 id="live"><code>live</code></h2>
-<p>用途：從 Grafana live read surface 產生 readiness 視圖。</p>
+<p>說明：從 Grafana live read surface 產生 readiness 視圖。</p>
 <p>JSON/YAML 輸出會包含共用 project status contract：<code>kind</code>、<code>schemaVersion</code>、 <code>toolVersion</code>、<code>scope</code>、<code>overall</code>、<code>domains</code>、<code>topBlockers</code>、<code>nextActions</code>。 live 輸出也會從 Grafana <code>GET /api/health</code> 補上 <code>discovery.instance</code>。 成功時會有 <code>source: api-health</code>、<code>status: available</code>，以及 <code>database</code>、 <code>version</code>、<code>commit</code> 等 health 欄位。若 health 讀取失敗， <code>discovery.instance.status</code> 會是 <code>unavailable</code> 並帶 <code>error</code>；這不會單獨把 domain readiness 判成 blocked。</p>
 <p>成功時的 instance metadata：</p>
 <pre><code>{

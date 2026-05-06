@@ -1,7 +1,7 @@
 # datasource add
 
 ## 用途
-透過 Grafana API 建立一個線上 Grafana datasource。
+用 Grafana API 建立一個線上 Grafana datasource。
 
 ## 何時使用
 當您想直接建立新的 datasource，或在套用前先 dry-run 建立步驟時，使用這個指令。
@@ -19,17 +19,17 @@
 
 ## 範例
 ```bash
-# 透過 Grafana API 建立一個線上 Grafana datasource。
+# 用 Grafana API 建立一個線上 Grafana datasource。
 grafana-util datasource add --profile prod --name tempo-main --type tempo --datasource-url http://tempo:3200 --preset-profile full --dry-run --json
 ```
 
 ```bash
-# 透過 Grafana API 建立一個線上 Grafana datasource。
+# 用 Grafana API 建立一個線上 Grafana datasource。
 grafana-util datasource add --url http://localhost:3000 --basic-user admin --basic-password admin --name prometheus-main --type prometheus --datasource-url http://prometheus:9090 --dry-run --table
 ```
 
 ```bash
-# 透過 Grafana API 建立一個線上 Grafana datasource。
+# 用 Grafana API 建立一個線上 Grafana datasource。
 grafana-util datasource add --url http://localhost:3000 --token "$GRAFANA_API_TOKEN" --name tempo-main --type tempo --datasource-url http://tempo:3200 --preset-profile full --dry-run --json
 ```
 

@@ -2,7 +2,7 @@
 
 ## 目的
 
-透過 Grafana API 匯入 alert 資源 JSON 檔。
+用 Grafana API 匯入 alert 資源 JSON 檔。
 
 ## 使用時機
 
@@ -38,12 +38,12 @@
 ## 範例
 
 ```bash
-# 透過 Grafana API 匯入 alert 資源 JSON 檔。
+# 用 Grafana API 匯入 alert 資源 JSON 檔。
 grafana-util alert import --url http://localhost:3000 --input-dir ./alerts/raw --replace-existing
 ```
 
 ```bash
-# 透過 Grafana API 匯入 alert 資源 JSON 檔。
+# 用 Grafana API 匯入 alert 資源 JSON 檔。
 grafana-util alert import --url http://localhost:3000 --input-dir ./alerts/raw --replace-existing --dry-run --json
 ```
 

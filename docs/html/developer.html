@@ -930,7 +930,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 
 <h1><span class="hero-title-main">Developer Guide</span></h1><p class="hero-summary">Maintainer routing for runtime, docs, contracts, and release work.</p>
 
-<section class="section-index"><h2>Guide Map</h2><p class="section-index-summary">Jump straight to the repo concern you are touching instead of scanning the whole maintainer guide.</p><ul class="section-index-list layout-grid"><li><a href="#start-here">Start Here</a></li><li><a href="#repo-priorities">Repo Priorities</a></li><li><a href="#current-public-cli-shape">Current Public CLI Shape</a></li><li><a href="#choose-your-lane">Choose Your Lane</a></li><li><a href="#documentation-boundaries">Documentation Boundaries</a></li><li><a href="#validation-defaults">Validation Defaults</a></li><li><a href="#maintenance-rules">Maintenance Rules</a></li><li><a href="#when-to-update-other-maintainer-docs">When To Update Other Maintainer Docs</a></li></ul></section><p>This page is the maintainer landing page for the repo.</p>
+<section class="section-index"><h2>Guide Map</h2><p class="section-index-summary">Jump straight to the repo concern you are touching instead of scanning the whole maintainer guide.</p><ul class="section-index-list layout-grid"><li><a href="#start-here">Start Here</a></li><li><a href="#repo-priorities">Repo Priorities</a></li><li><a href="#current-public-cli-shape">Current Public CLI Shape</a></li><li><a href="#choose-your-lane">Choose Your Lane</a></li><li><a href="#documentation-boundaries">Documentation Boundaries</a></li><li><a href="#validation-defaults">Validation Defaults</a></li><li><a href="#macos-to-linux-amd64-builds">macOS To Linux amd64 Builds</a></li><li><a href="#maintenance-rules">Maintenance Rules</a></li><li><a href="#when-to-update-other-maintainer-docs">When To Update Other Maintainer Docs</a></li></ul></section><p>This page is the maintainer landing page for the repo.</p>
 <p>Use it to orient quickly, decide which lane you are in, and jump to the document or code surface that actually owns the change. Do not turn this file into a second spec, a second quickstart, or a long policy dump.</p>
 <h2 id="start-here">Start Here</h2>
 <p>If you just entered the repo:</p>
@@ -980,6 +980,23 @@ make quality-ai-workflow</code></pre>
 <pre><code># Purpose: Regenerate derived docs artifacts.
 make man
 make html</code></pre>
+<h2 id="macos-to-linux-amd64-builds">macOS To Linux amd64 Builds</h2>
+<p>For macOS developers building the native Linux <code>amd64</code> Rust artifact without Docker, prepare the user-global toolchain first:</p>
+<pre><code># Purpose: Install the non-Docker Linux amd64 build tools on macOS.
+brew install zig rustup
+export PATH=&quot;$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH&quot;
+/opt/homebrew/opt/rustup/bin/rustup default stable
+/opt/homebrew/opt/rustup/bin/rustup target add x86_64-unknown-linux-gnu
+cargo install cargo-zigbuild</code></pre>
+<p>Homebrew <code>rustup</code> is keg-only because it conflicts with Homebrew <code>rust</code>. Put <code>/opt/homebrew/opt/rustup/bin</code> before <code>/opt/homebrew/bin</code> when running cross builds so <code>cargo</code> and <code>rustc</code> come from rustup. For future shells, add:</p>
+<pre><code># Purpose: Prefer rustup-managed Rust commands for cross builds.
+export PATH=&quot;$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH&quot;</code></pre>
+<p>Then run:</p>
+<pre><code># Purpose: Build the default Linux amd64 Rust artifact.
+make build-rust-linux-amd64</code></pre>
+<p>The zig build script also prefers LLVM <code>llvm-ar</code> for Linux archives. If the local zig path fails or you want an isolated toolchain, use the Docker fallback:</p>
+<pre><code># Purpose: Build the Linux amd64 Rust artifact in Docker.
+make build-rust-linux-amd64-docker</code></pre>
 <h2 id="maintenance-rules">Maintenance Rules</h2>
 <p>task explicitly needs parity work there.</p>
 <p><code>scripts/contracts/command-surface.json</code>.</p>
@@ -997,7 +1014,7 @@ make html</code></pre>
 <aside class="sidebar">
   <button class="sidebar-toggle sidebar-toggle-right" type="button" aria-expanded="true" aria-label="Toggle page sidebar">▶</button>
   <div class="sidebar-content">
-    <section class="sidebar-section"><h2>On This Page</h2><ul class="toc-list"><li class="toc-level-2"><a href="#start-here"><span class="toc-label">Start Here</span></a></li><li class="toc-level-2"><a href="#repo-priorities"><span class="toc-label">Repo Priorities</span></a></li><li class="toc-level-2"><a href="#current-public-cli-shape"><span class="toc-label">Current Public CLI Shape</span></a></li><li class="toc-level-2"><a href="#choose-your-lane"><span class="toc-label">Choose Your Lane</span></a></li><li class="toc-level-2"><a href="#documentation-boundaries"><span class="toc-label">Documentation Boundaries</span></a></li><li class="toc-level-2"><a href="#validation-defaults"><span class="toc-label">Validation Defaults</span></a></li><li class="toc-level-2"><a href="#maintenance-rules"><span class="toc-label">Maintenance Rules</span></a></li><li class="toc-level-2"><a href="#when-to-update-other-maintainer-docs"><span class="toc-label">When To Update Other Maintainer Docs</span></a></li></ul></section>
+    <section class="sidebar-section"><h2>On This Page</h2><ul class="toc-list"><li class="toc-level-2"><a href="#start-here"><span class="toc-label">Start Here</span></a></li><li class="toc-level-2"><a href="#repo-priorities"><span class="toc-label">Repo Priorities</span></a></li><li class="toc-level-2"><a href="#current-public-cli-shape"><span class="toc-label">Current Public CLI Shape</span></a></li><li class="toc-level-2"><a href="#choose-your-lane"><span class="toc-label">Choose Your Lane</span></a></li><li class="toc-level-2"><a href="#documentation-boundaries"><span class="toc-label">Documentation Boundaries</span></a></li><li class="toc-level-2"><a href="#validation-defaults"><span class="toc-label">Validation Defaults</span></a></li><li class="toc-level-2"><a href="#macos-to-linux-amd64-builds"><span class="toc-label">macOS To Linux amd64 Builds</span></a></li><li class="toc-level-2"><a href="#maintenance-rules"><span class="toc-label">Maintenance Rules</span></a></li><li class="toc-level-2"><a href="#when-to-update-other-maintainer-docs"><span class="toc-label">When To Update Other Maintainer Docs</span></a></li></ul></section>
   </div>
 </aside>
 

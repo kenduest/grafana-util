@@ -103,7 +103,7 @@
 對於敏感資訊，例如 data source 密碼與 secure connection 欄位，`grafana-util` 採用 **「預設安全 (Safe-by-Default)」** 的做法。
 
 - **匯出 (Export)**：敏感欄位會被遮蔽 (masked)，匯出檔可以安全地進 Git。
-- **恢復 (Recovery)**：執行 `import` 時，CLI 會辨識哪些 secret 缺失，並透過環境變數或互動式提示提供安全的補回流程。
+- **恢復 (Recovery)**：執行 `import` 時，CLI 會辨識哪些 secret 缺失，並用環境變數或互動式提示提供安全的補回流程。
 
 ### 這件事在實務上代表什麼
 

@@ -2,7 +2,7 @@
 
 ## Root
 
-用途：匯出並檢視 Grafana snapshot inventory bundles。
+說明：匯出並檢視 Grafana snapshot inventory bundles。
 
 適用時機：當你想建立一個本機 snapshot root，收錄 dashboard、datasource 與 access inventory，供後續檢視時。
 
@@ -49,7 +49,7 @@ grafana-util status snapshot export --url http://localhost:3000 --token "$GRAFAN
 
 ## `export`
 
-用途：將 dashboard、datasource 與 access inventory 匯出到本機 snapshot bundle。
+說明：將 dashboard、datasource 與 access inventory 匯出到本機 snapshot bundle。
 
 適用時機：當你需要一個不必連到 Grafana 也能檢視的本機 snapshot root 時。
 
@@ -104,7 +104,7 @@ grafana-util status snapshot export --profile prod --run timestamp --overwrite
 
 ## `review`
 
-用途：在不接觸 Grafana 的情況下檢視本機 snapshot inventory。
+說明：在不接觸 Grafana 的情況下檢視本機 snapshot inventory。
 
 適用時機：當你想把匯出的 snapshot root 以 table、csv、text、json、yaml 或 interactive 格式查看時。
 

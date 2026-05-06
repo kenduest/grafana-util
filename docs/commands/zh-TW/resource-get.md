@@ -1,7 +1,7 @@
 # `grafana-util status resource get`
 
 ## 用途
-透過 selector 取得單一目前支援的 live Grafana 資源。
+用 selector 取得單一目前支援的 live Grafana 資源。
 
 ## 何時使用
 當你需要某一筆支援資源的 live payload，且想用比完整 export 或 inspect workflow 更簡單的逃生入口時，使用這個指令。

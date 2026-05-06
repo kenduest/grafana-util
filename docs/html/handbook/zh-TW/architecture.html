@@ -968,7 +968,7 @@ code[class*="language-"],pre[class*="language-"]{color:#ccc;background:none;font
 <ul><li>備份、回放、diff、audit：用 <code>raw/</code></li><li>跨環境遷移、乾淨匯入：用 <code>prompt/</code></li><li>目標是 Grafana disk provisioning：用 <code>provisioning/</code></li></ul>
 <h2 id="秘密治理-masked-recovery">秘密治理 (Masked Recovery)</h2>
 <p>對於敏感資訊，例如 data source 密碼與 secure connection 欄位，<code>grafana-util</code> 採用 <strong>「預設安全 (Safe-by-Default)」</strong> 的做法。</p>
-<ul><li><strong>匯出 (Export)</strong>：敏感欄位會被遮蔽 (masked)，匯出檔可以安全地進 Git。</li><li><strong>恢復 (Recovery)</strong>：執行 <code>import</code> 時，CLI 會辨識哪些 secret 缺失，並透過環境變數或互動式提示提供安全的補回流程。</li></ul>
+<ul><li><strong>匯出 (Export)</strong>：敏感欄位會被遮蔽 (masked)，匯出檔可以安全地進 Git。</li><li><strong>恢復 (Recovery)</strong>：執行 <code>import</code> 時，CLI 會辨識哪些 secret 缺失，並用環境變數或互動式提示提供安全的補回流程。</li></ul>
 <h3 id="這件事在實務上代表什麼">這件事在實務上代表什麼</h3>
 <p>這個設計是為了避免兩種最糟的結果：</p>
 <ul><li>可用的 data source secret 被直接洩漏到 Git</li><li>團隊誤以為 masked export 已經包含完整 replay 所需的全部資料</li></ul>

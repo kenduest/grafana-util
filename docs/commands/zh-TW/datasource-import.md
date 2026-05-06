@@ -1,7 +1,7 @@
 # datasource import
 
 ## 用途
-透過 Grafana API 匯入 datasource inventory。
+用 Grafana API 匯入 datasource inventory。
 
 ## 何時使用
 當您有本地 dataworkspace package 或 provisioning 樹，想把它推進 Grafana，無論是實際執行或 dry run，都可以使用這個指令。
@@ -18,17 +18,17 @@
 
 ## 範例
 ```bash
-# 透過 Grafana API 匯入 datasource inventory。
+# 用 Grafana API 匯入 datasource inventory。
 grafana-util datasource import --profile prod --input-dir ./datasources --dry-run --table
 ```
 
 ```bash
-# 透過 Grafana API 匯入 datasource inventory。
+# 用 Grafana API 匯入 datasource inventory。
 grafana-util datasource import --url http://localhost:3000 --basic-user admin --basic-password admin --input-dir ./datasources --use-export-org --only-org-id 2 --create-missing-orgs --dry-run --json
 ```
 
 ```bash
-# 透過 Grafana API 匯入 datasource inventory。
+# 用 Grafana API 匯入 datasource inventory。
 grafana-util datasource import --url http://localhost:3000 --token "$GRAFANA_API_TOKEN" --input-dir ./datasources --dry-run --table
 ```
 
