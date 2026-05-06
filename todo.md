@@ -456,7 +456,13 @@ Action:
 
 Backlog:
 
-- [ ] Plan a narrow shared review-adapter consumption pass that threads the new access, datasource, and alert adapters into one internal consumer, such as TUI, summary, or test projection, without changing public JSON.
+- [x] Plan a narrow shared review-adapter consumption pass that threads the new
+  access, datasource, and alert adapters into one internal consumer, such as
+  TUI, summary, or test projection, without changing public JSON.
+  `build_review_mutation_summary_rows(&ReviewMutationEnvelope)` is now the
+  shared internal consumer for access import dry-run, datasource import
+  dry-run, datasource live mutation, and alert plan review adapters, with tests
+  proving no public JSON drift.
 
 Validation:
 

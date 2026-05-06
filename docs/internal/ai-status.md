@@ -21,6 +21,12 @@ Current AI-maintained status only.
 - Older entries moved to [`ai-status-archive-2026-04-28.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-28.md).
 - Older entries moved to [`ai-status-archive-2026-05-02.md`](/Users/ken/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-05-02.md).
 
+## 2026-05-02 - Consume mutation review adapters
+- State: Done
+- Scope: Rust internal shared review-adapter consumption for access import dry-run, datasource import dry-run, datasource live mutation, and alert plan rows; focused tests; TODO trace. Public JSON, CLI behavior, generated docs, and Python implementation are out of scope.
+- Current Update: Added `build_review_mutation_summary_rows(&ReviewMutationEnvelope)` as the shared internal consumer for the proven review adapters.
+- Result: Adapter consumption is now covered by tests without public JSON or CLI drift.
+
 ## 2026-05-02 - Cleanup TODO trace after mutation adapter pass
 - State: Done
 - Scope: maintainer-only TODO cleanup and AI trace refresh after the mutation adapter pass. Rust behavior, public JSON, CLI behavior, generated docs, and Python implementation are out of scope.
@@ -53,10 +59,3 @@ Current AI-maintained status only.
 - Baseline: Several read/aggregation paths owned `serde_json::Value` or domain status rows but borrowed them and cloned maps, arrays, or status fields back out during normalization.
 - Current Update: Consumed owned dashboard response objects, moved existing sync availability arrays, extracted request-backed contact-point identifiers without whole-object clones, and merged live multi-org domain statuses by consuming per-org rows.
 - Result: Focused dashboard/sync/status tests and full Rust validation pass.
-
-## 2026-04-28 - Normalize status producers
-- State: Done
-- Scope: Rust staged/live project-status producer adapters for domain-owned alert/access/sync/promotion signals, focused status tests, full Rust validation, TODO trace, and AI workflow validation. Public JSON, generated docs, live collection transport, and Python implementation are out of scope.
-- Baseline: Dashboard, datasource, access staged, and selected live producers already used the internal `StatusProducer` model, while staged alert/sync/promotion and live alert/access/sync/promotion document-backed rows still built `StatusReading` directly before feeding shared status aggregation.
-- Current Update: Converted the document-backed staged/live status builders to domain-owned `StatusProducer` inputs and left read-failed, multi-org merge, and transport-only fallback rows outside the producer trait.
-- Result: Focused producer tests, full Rust tests, clippy, and AI workflow validation pass.

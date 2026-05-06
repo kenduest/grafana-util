@@ -559,8 +559,9 @@ mod tests {
     use super::*;
     use crate::datasource::{DatasourceImportDryRunReport, DatasourceImportInputFormat};
     use crate::review_contract::{
-        REVIEW_ACTION_BLOCKED_READ_ONLY, REVIEW_ACTION_WOULD_UPDATE,
-        REVIEW_REASON_TARGET_READ_ONLY, REVIEW_STATUS_BLOCKED, REVIEW_STATUS_READY,
+        build_review_mutation_summary_rows, REVIEW_ACTION_BLOCKED_READ_ONLY,
+        REVIEW_ACTION_WOULD_UPDATE, REVIEW_REASON_TARGET_READ_ONLY, REVIEW_STATUS_BLOCKED,
+        REVIEW_STATUS_READY,
     };
     use serde_json::json;
     use std::path::PathBuf;
@@ -691,6 +692,77 @@ mod tests {
         assert_eq!(
             envelope.blocked_reasons,
             vec![REVIEW_REASON_TARGET_READ_ONLY.to_string()]
+        );
+    }
+
+    #[test]
+    fn datasource_import_dry_run_review_envelope_feeds_shared_summary_rows_without_json_drift() {
+        let report = DatasourceImportDryRunReport {
+            mode: "create-or-update".to_string(),
+            input_dir: PathBuf::from("/tmp/datasources"),
+            input_format: DatasourceImportInputFormat::Inventory,
+            source_org_id: "1".to_string(),
+            target_org_id: "7".to_string(),
+            rows: vec![vec![
+                "prom-main".to_string(),
+                "Prometheus Main".to_string(),
+                "prometheus".to_string(),
+                "uid".to_string(),
+                "exists-uid".to_string(),
+                "would-update".to_string(),
+                "7".to_string(),
+                "datasources.json#0".to_string(),
+                "prom-main".to_string(),
+                "12".to_string(),
+                "false".to_string(),
+                String::new(),
+            ]],
+            datasource_count: 1,
+            would_create: 0,
+            would_update: 1,
+            would_skip: 0,
+            would_block: 0,
+        };
+        let public_json_before = build_datasource_import_dry_run_json_value(&report);
+
+        let envelope = build_datasource_import_dry_run_review_envelope(&report);
+        let summary_rows = build_review_mutation_summary_rows(&envelope);
+
+        assert_eq!(summary_rows.len(), 1);
+        assert_eq!(summary_rows[0].domain, "datasource");
+        assert_eq!(summary_rows[0].resource_kind, "datasource");
+        assert_eq!(summary_rows[0].identity, "prom-main");
+        assert_eq!(summary_rows[0].action, REVIEW_ACTION_WOULD_UPDATE);
+        assert_eq!(summary_rows[0].status, REVIEW_STATUS_READY);
+        assert_eq!(
+            summary_rows[0].details.as_deref(),
+            Some("matchBasis=uid destination=exists-uid file=datasources.json#0 targetUid=prom-main targetVersion=12 targetReadOnly=false")
+        );
+        assert_eq!(summary_rows[0].action_count, 1);
+        assert_eq!(summary_rows[0].domain_count, 1);
+        assert_eq!(summary_rows[0].blocked_count, 0);
+        assert_eq!(summary_rows[0].warning_count, 0);
+        assert!(summary_rows[0].blocked_reasons.is_empty());
+        assert_eq!(
+            build_datasource_import_dry_run_json_value(&report),
+            public_json_before
+        );
+        assert_eq!(
+            public_json_before["datasources"][0],
+            json!({
+                "uid": "prom-main",
+                "name": "Prometheus Main",
+                "type": "prometheus",
+                "matchBasis": "uid",
+                "destination": "exists-uid",
+                "action": "would-update",
+                "orgId": "7",
+                "file": "datasources.json#0",
+                "targetUid": "prom-main",
+                "targetVersion": 12,
+                "targetReadOnly": false,
+                "blockedReason": null,
+            })
         );
     }
 }

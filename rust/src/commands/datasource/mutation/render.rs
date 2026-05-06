@@ -404,8 +404,9 @@ pub(crate) fn render_import_table(
 mod tests {
     use super::*;
     use crate::review_contract::{
-        REVIEW_ACTION_BLOCKED_UID_MISMATCH, REVIEW_ACTION_WOULD_DELETE,
-        REVIEW_REASON_UID_NAME_MISMATCH, REVIEW_STATUS_BLOCKED, REVIEW_STATUS_READY,
+        build_review_mutation_summary_rows, REVIEW_ACTION_BLOCKED_UID_MISMATCH,
+        REVIEW_ACTION_WOULD_DELETE, REVIEW_REASON_UID_NAME_MISMATCH, REVIEW_STATUS_BLOCKED,
+        REVIEW_STATUS_READY,
     };
     use serde_json::json;
 
@@ -503,6 +504,52 @@ mod tests {
         assert_eq!(
             envelope.blocked_reasons,
             vec![REVIEW_REASON_UID_NAME_MISMATCH.to_string()]
+        );
+    }
+
+    #[test]
+    fn datasource_live_mutation_review_envelope_feeds_shared_summary_rows_without_json_drift() {
+        let rows = vec![vec![
+            "modify".to_string(),
+            "prom-main".to_string(),
+            "Prometheus Main".to_string(),
+            "prometheus".to_string(),
+            "exists-uid".to_string(),
+            "would-update".to_string(),
+            "7".to_string(),
+        ]];
+        let public_json_before = render_live_mutation_json(&rows);
+
+        let envelope = build_live_mutation_review_envelope(&rows);
+        let summary_rows = build_review_mutation_summary_rows(&envelope);
+
+        assert_eq!(summary_rows.len(), 1);
+        assert_eq!(summary_rows[0].domain, "datasource");
+        assert_eq!(summary_rows[0].resource_kind, "datasource");
+        assert_eq!(summary_rows[0].identity, "prom-main");
+        assert_eq!(summary_rows[0].action, "would-update");
+        assert_eq!(summary_rows[0].status, REVIEW_STATUS_READY);
+        assert_eq!(
+            summary_rows[0].details.as_deref(),
+            Some("operation=modify match=exists-uid targetId=7")
+        );
+        assert_eq!(summary_rows[0].action_count, 1);
+        assert_eq!(summary_rows[0].domain_count, 1);
+        assert_eq!(summary_rows[0].blocked_count, 0);
+        assert_eq!(summary_rows[0].warning_count, 0);
+        assert!(summary_rows[0].blocked_reasons.is_empty());
+        assert_eq!(render_live_mutation_json(&rows), public_json_before);
+        assert_eq!(
+            public_json_before["items"][0],
+            json!({
+                "operation": "modify",
+                "uid": "prom-main",
+                "name": "Prometheus Main",
+                "type": "prometheus",
+                "match": "exists-uid",
+                "action": "would-update",
+                "targetId": "7",
+            })
         );
     }
 }

@@ -21,6 +21,12 @@ Current AI change log only.
 - Older entries moved to [`ai-changes-archive-2026-04-28.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-changes-archive-2026-04-28.md).
 - Older entries moved to [`ai-changes-archive-2026-05-02.md`](/Users/ken/work/grafana-utils/docs/internal/archive/ai-changes-archive-2026-05-02.md).
 
+## 2026-05-02 - Consume mutation review adapters
+- Summary: added `build_review_mutation_summary_rows(&ReviewMutationEnvelope)` as a shared internal consumer for access import dry-run, datasource import dry-run, datasource live mutation, and alert plan review adapters.
+- Tests: worker tests prove those adapters feed the shared summary consumer without public JSON drift.
+- Impact: `rust/src/commands/review_contract.rs`, focused Rust tests, `todo.md`, and AI trace docs. Public JSON, CLI behavior, generated docs, and Python implementation are intentionally unchanged.
+- Rollback/Risk: low internal-consumer change. Rollback would remove the shared summary projection while leaving public domain review and dry-run outputs unchanged.
+
 ## 2026-05-02 - Cleanup TODO trace after mutation adapter pass
 - Summary: refreshed the active AI trace entry after the mutation adapter pass and kept this as docs/TODO cleanup only.
 - Tests: no Rust tests were needed for this documentation-only update. Validation should be `make quality-ai-workflow` and `git diff --check`.
@@ -85,10 +91,3 @@ Current AI change log only.
 - Test Run: `cargo test --manifest-path rust/Cargo.toml --quiet build_external_export_document`; `cargo test --manifest-path rust/Cargo.toml --quiet raw_to_prompt`; `cargo test --manifest-path rust/Cargo.toml --quiet dashboard_export_import_inventory_rust_tests`; `cargo test --manifest-path rust/Cargo.toml --quiet collect_library_panel_exports_with_request_records_failures_as_warnings`; `cargo test --manifest-path rust/Cargo.toml --quiet export_diff_rust_tests`; full Rust validation.
 - Impact: `rust/src/commands/dashboard/export_prompt/`, dashboard facade/consumer imports, `todo.md`, and AI trace docs. Public CLI/docs, generated artifacts, Python implementation, and runtime behavior are intentionally unchanged.
 - Rollback/Risk: low behavior-preserving module move. Rollback would restore the old root-level `prompt*.rs` layout; focused prompt/export tests cover the import wiring.
-
-## 2026-04-27 - Guard dashboard permissions as adjacent evidence
-- Summary: rejected dashboard permission bundle/export artifacts from shared dashboard JSON extraction and added workspace/access regressions so permission bundles remain adjacent evidence rather than dashboard JSON or prompt export input.
-- Tests: covered preserved-web-import and import-payload rejection for permission bundles, raw-to-prompt single-file rejection, review artifact resolution with raw `permissions.json`, sync workspace bundle auto-discovery ignoring dashboard permission bundles, and access `resource=all` ignoring dashboard workspace JSON.
-- Test Run: `cargo test --manifest-path rust/Cargo.toml build_preserved_web_import_document_rejects_permission_bundle --quiet`; `cargo test --manifest-path rust/Cargo.toml raw_to_prompt_single_file_rejects_permission_bundle --quiet`; `cargo test --manifest-path rust/Cargo.toml run_sync_cli_bundle_workspace_auto_discovery_ignores_dashboard_permissions_bundle --quiet`; `cargo test --manifest-path rust/Cargo.toml all_plan_ignores_dashboard_workspace_json_when_collecting_access_bundles --quiet`.
-- Impact: `rust/src/commands/dashboard/files.rs`, dashboard regression tests, `rust/src/commands/sync/bundle_exec_sources_rust_tests.rs`, `rust/src/commands/access/access_plan_tests.rs`, `todo.md`, and AI trace docs. Permission restore/apply behavior, public JSON contracts, generated docs, and Python implementation are intentionally unchanged.
-- Rollback/Risk: low targeted boundary fix. Rollback would allow single-object dashboard paths to reinterpret permission artifacts as dashboards and remove cross-domain guard coverage.

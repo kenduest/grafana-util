@@ -440,6 +440,61 @@ pub(crate) fn build_review_mutation_envelope(
     }
 }
 
+#[allow(dead_code)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct ReviewMutationSummaryRow {
+    pub domain: String,
+    pub resource_kind: String,
+    pub identity: String,
+    pub action: String,
+    pub status: String,
+    pub details: Option<String>,
+    pub action_count: usize,
+    pub domain_count: usize,
+    pub blocked_count: usize,
+    pub warning_count: usize,
+    pub blocked_reasons: Vec<String>,
+}
+
+#[allow(dead_code)]
+pub(crate) fn build_review_mutation_summary_rows(
+    envelope: &ReviewMutationEnvelope,
+) -> Vec<ReviewMutationSummaryRow> {
+    let mut rows = envelope
+        .actions
+        .iter()
+        .map(|action| ReviewMutationSummaryRow {
+            domain: action.domain.clone(),
+            resource_kind: action.resource_kind.clone(),
+            identity: action.identity.clone(),
+            action: action.action.clone(),
+            status: action.status.clone(),
+            details: action.details.clone(),
+            action_count: envelope.summary.action_count,
+            domain_count: envelope.summary.domain_count,
+            blocked_count: envelope.summary.blocked_count,
+            warning_count: envelope.summary.warning_count,
+            blocked_reasons: envelope.blocked_reasons.clone(),
+        })
+        .collect::<Vec<_>>();
+    if rows.is_empty() {
+        rows.push(ReviewMutationSummaryRow {
+            domain: String::new(),
+            resource_kind: String::new(),
+            identity: String::new(),
+            action: String::new(),
+            status: String::new(),
+            details: None,
+            action_count: envelope.summary.action_count,
+            domain_count: envelope.summary.domain_count,
+            blocked_count: envelope.summary.blocked_count,
+            warning_count: envelope.summary.warning_count,
+            blocked_reasons: envelope.blocked_reasons.clone(),
+        });
+    }
+    rows
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -475,5 +530,64 @@ mod tests {
                 }]
             })
         );
+    }
+
+    #[test]
+    fn review_mutation_summary_rows_project_counts_and_blocked_reasons() {
+        let envelope = build_review_mutation_envelope(
+            vec![
+                ReviewMutationActionInput {
+                    action_id: "dashboard:create:latency".to_string(),
+                    action: REVIEW_ACTION_WOULD_CREATE.to_string(),
+                    domain: "dashboard".to_string(),
+                    resource_kind: "grafana-dashboard".to_string(),
+                    identity: "latency".to_string(),
+                    status: REVIEW_STATUS_READY.to_string(),
+                    blocked_reason: None,
+                    details: None,
+                    review_hints: Vec::new(),
+                    raw: json!({}),
+                }
+                .into(),
+                ReviewMutationActionInput {
+                    action_id: "datasource:extra:prometheus".to_string(),
+                    action: REVIEW_ACTION_EXTRA_REMOTE.to_string(),
+                    domain: "datasource".to_string(),
+                    resource_kind: "grafana-datasource".to_string(),
+                    identity: "prometheus".to_string(),
+                    status: REVIEW_STATUS_WARNING.to_string(),
+                    blocked_reason: None,
+                    details: None,
+                    review_hints: Vec::new(),
+                    raw: json!({}),
+                }
+                .into(),
+                ReviewMutationActionInput {
+                    action_id: "access:blocked:viewer".to_string(),
+                    action: REVIEW_ACTION_BLOCKED.to_string(),
+                    domain: "access".to_string(),
+                    resource_kind: "grafana-user".to_string(),
+                    identity: "viewer@example.com".to_string(),
+                    status: REVIEW_STATUS_BLOCKED.to_string(),
+                    blocked_reason: Some("externally synced user".to_string()),
+                    details: None,
+                    review_hints: Vec::new(),
+                    raw: json!({}),
+                }
+                .into(),
+            ],
+            &["dashboard", "datasource", "access"],
+        );
+
+        let rows = build_review_mutation_summary_rows(&envelope);
+
+        assert_eq!(rows.len(), 3);
+        assert!(rows.iter().all(|row| row.action_count == 3));
+        assert!(rows.iter().all(|row| row.domain_count == 3));
+        assert!(rows.iter().all(|row| row.blocked_count == 1));
+        assert!(rows.iter().all(|row| row.warning_count == 1));
+        assert!(rows
+            .iter()
+            .all(|row| row.blocked_reasons == vec!["externally synced user".to_string()]));
     }
 }

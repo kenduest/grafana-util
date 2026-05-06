@@ -241,6 +241,7 @@ mod tests {
     use super::{
         build_access_import_dry_run_document, build_access_import_dry_run_review_envelope,
     };
+    use crate::review_contract::build_review_mutation_summary_rows;
     use serde_json::{json, Map, Value};
     use std::path::Path;
 
@@ -360,5 +361,52 @@ mod tests {
                 Value::Object(blocked.raw.as_object().cloned().unwrap()),
             ])
         );
+    }
+
+    #[test]
+    fn access_import_dry_run_review_envelope_feeds_shared_summary_rows_without_public_json_drift() {
+        let ready_row = Map::from_iter(vec![
+            ("index".to_string(), json!("1")),
+            ("identity".to_string(), json!("alice@example.com")),
+            ("action".to_string(), json!("created")),
+            ("status".to_string(), json!("ready")),
+            ("blocked".to_string(), json!(false)),
+            (
+                "detail".to_string(),
+                json!("would create user alice@example.com"),
+            ),
+        ]);
+        let rows = vec![ready_row.clone()];
+        let document = build_access_import_dry_run_document(
+            "user",
+            &rows,
+            1,
+            1,
+            0,
+            0,
+            Path::new("/tmp/access-users"),
+        );
+        let public_rows_before = document["rows"].clone();
+
+        let review = build_access_import_dry_run_review_envelope(&document).unwrap();
+        let summary_rows = build_review_mutation_summary_rows(&review);
+
+        assert_eq!(summary_rows.len(), 1);
+        assert_eq!(summary_rows[0].domain, "access");
+        assert_eq!(summary_rows[0].resource_kind, "user");
+        assert_eq!(summary_rows[0].identity, "alice@example.com");
+        assert_eq!(summary_rows[0].action, "would-create");
+        assert_eq!(summary_rows[0].status, "ready");
+        assert_eq!(
+            summary_rows[0].details.as_deref(),
+            Some("would create user alice@example.com")
+        );
+        assert_eq!(summary_rows[0].action_count, 1);
+        assert_eq!(summary_rows[0].domain_count, 1);
+        assert_eq!(summary_rows[0].blocked_count, 0);
+        assert_eq!(summary_rows[0].warning_count, 0);
+        assert!(summary_rows[0].blocked_reasons.is_empty());
+        assert_eq!(document["rows"], public_rows_before);
+        assert_eq!(document["rows"][0], Value::Object(ready_row));
     }
 }

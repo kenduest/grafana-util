@@ -3,6 +3,7 @@ use super::{
     CONTACT_POINT_KIND, MUTE_TIMING_KIND, POLICIES_KIND, RULE_KIND, TEMPLATE_KIND,
     TOOL_SCHEMA_VERSION,
 };
+use crate::review_contract::build_review_mutation_summary_rows;
 use reqwest::Method;
 use serde_json::json;
 use tempfile::tempdir;
@@ -620,4 +621,45 @@ fn alert_plan_review_projection_maps_local_actions_without_changing_raw_rows() {
     assert_eq!(envelope.domains[0].delete, 1);
     assert_eq!(envelope.domains[0].warning, 1);
     assert_eq!(envelope.domains[0].blocked, 1);
+}
+
+#[test]
+fn alert_plan_review_envelope_feeds_shared_summary_rows_without_public_json_drift() {
+    let update_row = json!({
+        "domain": "alert",
+        "resourceKind": CONTACT_POINT_KIND,
+        "kind": CONTACT_POINT_KIND,
+        "identity": "cp-update",
+        "actionId": "grafana-contact-point::cp-update::update",
+        "action": "update",
+        "status": "ready",
+        "reason": "drift-detected",
+        "blockedReason": null,
+        "reviewHints": [],
+        "changedFields": ["settings"],
+        "changes": [],
+        "path": "/tmp/contact-points/cp-update.json",
+        "desired": {"uid": "cp-update"},
+        "live": {"uid": "cp-update"}
+    });
+    let plan = super::build_alert_plan_document(&[update_row.clone()], false);
+    let public_rows_before = plan["rows"].clone();
+
+    let envelope = super::alert_runtime_support::build_alert_plan_review_envelope(&plan).unwrap();
+    let summary_rows = build_review_mutation_summary_rows(&envelope);
+
+    assert_eq!(summary_rows.len(), 1);
+    assert_eq!(summary_rows[0].domain, "alert");
+    assert_eq!(summary_rows[0].resource_kind, CONTACT_POINT_KIND);
+    assert_eq!(summary_rows[0].identity, "cp-update");
+    assert_eq!(summary_rows[0].action, "would-update");
+    assert_eq!(summary_rows[0].status, "ready");
+    assert_eq!(summary_rows[0].details.as_deref(), Some("fields=settings"));
+    assert_eq!(summary_rows[0].action_count, 1);
+    assert_eq!(summary_rows[0].domain_count, 1);
+    assert_eq!(summary_rows[0].blocked_count, 0);
+    assert_eq!(summary_rows[0].warning_count, 0);
+    assert!(summary_rows[0].blocked_reasons.is_empty());
+    assert_eq!(plan["rows"], public_rows_before);
+    assert_eq!(plan["rows"][0], update_row);
 }

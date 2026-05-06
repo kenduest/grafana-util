@@ -34,3 +34,10 @@
 - Baseline: Provisioning was already a file-backed export lane, but TODO still needed regression evidence that it is not the canonical dashboard contract.
 - Current Update: Added compare tests proving raw export wrappers and provisioning projections normalize to the same classic dashboard payload, and added a sync bundle guard that rejects explicit dual dashboard raw/provisioning inputs.
 - Result: Focused compare, source-loader, sync bundle, and import dry-run tests pass.
+
+## 2026-04-28 - Normalize status producers
+- State: Done
+- Scope: Rust staged/live project-status producer adapters for domain-owned alert/access/sync/promotion signals, focused status tests, full Rust validation, TODO trace, and AI workflow validation. Public JSON, generated docs, live collection transport, and Python implementation are out of scope.
+- Baseline: Dashboard, datasource, access staged, and selected live producers already used the internal `StatusProducer` model, while staged alert/sync/promotion and live alert/access/sync/promotion document-backed rows still built `StatusReading` directly before feeding shared status aggregation.
+- Current Update: Converted the document-backed staged/live status builders to domain-owned `StatusProducer` inputs and left read-failed, multi-org merge, and transport-only fallback rows outside the producer trait.
+- Result: Focused producer tests, full Rust tests, clippy, and AI workflow validation pass.
