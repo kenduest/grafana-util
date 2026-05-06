@@ -27,6 +27,12 @@ Current AI change log only.
 - Impact: `docs/internal/ai-status.md`, `docs/internal/ai-changes.md`, and the current AI trace only. Rust behavior, public JSON, CLI behavior, generated docs, and Python implementation are intentionally unchanged.
 - Rollback/Risk: low documentation-only change. Rollback would remove the refreshed TODO trace note and restore the previous active trace state.
 
+## 2026-05-02 - Close remaining P3 TODO guardrail
+- Summary: closed the remaining P3 TODO guardrail in the active AI trace and added a concrete backlog item to consume the review-adapter output on the next pass.
+- Tests: no Rust tests were needed because this is docs/TODO cleanup only. Validation should be `make quality-ai-workflow` and `git diff --check`.
+- Impact: `docs/internal/ai-status.md`, `docs/internal/ai-changes.md`, and the current AI trace only. Rust behavior, public JSON, CLI behavior, generated docs, and Python implementation are intentionally unchanged.
+- Rollback/Risk: low documentation-only change. Rollback would remove the guardrail closure note and the new review-adapter consumption backlog entry.
+
 ## 2026-05-02 - Extend mutation action adapters
 - Summary: added internal `ReviewMutationAction` projections/envelopes for access import dry-run, datasource import dry-run, datasource live mutation preview, and alert plan rows without changing public JSON.
 - Tests: followed TDD in worker slices for access, datasource import, datasource live mutation, and alert plan adapters; then ran focused adapter tests, broader access/datasource/alert filters, and full Rust validation.
@@ -86,10 +92,3 @@ Current AI change log only.
 - Test Run: `cargo test --manifest-path rust/Cargo.toml build_preserved_web_import_document_rejects_permission_bundle --quiet`; `cargo test --manifest-path rust/Cargo.toml raw_to_prompt_single_file_rejects_permission_bundle --quiet`; `cargo test --manifest-path rust/Cargo.toml run_sync_cli_bundle_workspace_auto_discovery_ignores_dashboard_permissions_bundle --quiet`; `cargo test --manifest-path rust/Cargo.toml all_plan_ignores_dashboard_workspace_json_when_collecting_access_bundles --quiet`.
 - Impact: `rust/src/commands/dashboard/files.rs`, dashboard regression tests, `rust/src/commands/sync/bundle_exec_sources_rust_tests.rs`, `rust/src/commands/access/access_plan_tests.rs`, `todo.md`, and AI trace docs. Permission restore/apply behavior, public JSON contracts, generated docs, and Python implementation are intentionally unchanged.
 - Rollback/Risk: low targeted boundary fix. Rollback would allow single-object dashboard paths to reinterpret permission artifacts as dashboards and remove cross-domain guard coverage.
-
-## 2026-04-27 - Guard Git Sync dashboard live apply boundaries
-- Summary: treated workspace-backed dashboard browse sources as local review trees and added sync apply handoff regressions so Git Sync-managed dashboards remain Git-owned targets instead of becoming direct live API writes.
-- Tests: covered workspace browse local-source detection, apply-intent ownership/provenance preservation, Git Sync dashboard live-apply rejection before transport, and reusable command-output live-apply rejection.
-- Test Run: `cargo test --manifest-path rust/Cargo.toml workspace_roots_are_treated_as_local_browse_sources --quiet`; `cargo test --manifest-path rust/Cargo.toml build_sync_apply_intent_document_preserves_dashboard_ownership_provenance --quiet`; `cargo test --manifest-path rust/Cargo.toml execute_live_apply_with_request_blocks_git_sync_dashboard_from_apply_intent_handoff --quiet`; `cargo test --manifest-path rust/Cargo.toml execute_sync_command_rejects_live_apply_reusable_output --quiet`.
-- Impact: `rust/src/commands/dashboard/browse/mod.rs`, `rust/src/commands/dashboard/browse/tui.rs`, `rust/src/commands/sync/rust_tests.rs`, `rust/src/commands/sync/live_rust_tests.rs`, `rust/src/commands/sync/cli_rust_tests.rs`, `todo.md`, and AI trace docs. Public JSON, generated docs, Python implementation, and actual Git PR automation are intentionally unchanged.
-- Rollback/Risk: low behavior-boundary fix. Rollback would make workspace-backed local browse trees depend on the older `input_dir`-only local-mode check and would remove the sync handoff regressions.

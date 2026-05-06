@@ -27,3 +27,10 @@
 - Baseline: The dashboard directory re-layering TODO required a fresh inventory before any later move, and recent ownership/Git Sync/permission boundary work changed the best next candidates.
 - Current Update: Added `docs/internal/dashboard-directory-relayering-inventory.md` with mixed-responsibility files, stable boundaries, and candidate future moves for prompt-lane transform, export-org source discovery, and status live collector namespace cleanup.
 - Result: The inventory checkpoint is complete; actual `git mv` work remains gated behind one-boundary-per-commit guardrails.
+
+## 2026-04-26 - Prove provisioning remains derived dashboard projection
+- State: Done
+- Scope: Rust dashboard compare/import regression tests, sync bundle dashboard source guard, focused tests, and TODO trace. Public JSON, generated docs, and dashboard v2 support are out of scope.
+- Baseline: Provisioning was already a file-backed export lane, but TODO still needed regression evidence that it is not the canonical dashboard contract.
+- Current Update: Added compare tests proving raw export wrappers and provisioning projections normalize to the same classic dashboard payload, and added a sync bundle guard that rejects explicit dual dashboard raw/provisioning inputs.
+- Result: Focused compare, source-loader, sync bundle, and import dry-run tests pass.

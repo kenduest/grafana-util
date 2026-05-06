@@ -450,9 +450,13 @@ Dashboard tooling remains deeper than some other domains. That is useful, but th
 
 Action:
 
-- [ ] For every new dashboard intelligence feature, check whether access, datasource, alert, or workspace needs a corresponding minimal contract.
-- [ ] Prefer shared review/status/output infrastructure before adding another dashboard-only surface.
-- [ ] Keep simple backup/export use cases low-friction.
+- [x] For every new dashboard intelligence feature, check whether access, datasource, alert, or workspace needs a corresponding minimal contract.
+- [x] Prefer shared review/status/output infrastructure before adding another dashboard-only surface.
+- [x] Keep simple backup/export use cases low-friction.
+
+Backlog:
+
+- [ ] Plan a narrow shared review-adapter consumption pass that threads the new access, datasource, and alert adapters into one internal consumer, such as TUI, summary, or test projection, without changing public JSON.
 
 Validation:
 

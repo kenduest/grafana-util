@@ -27,6 +27,12 @@ Current AI-maintained status only.
 - Current Update: Recorded the latest mutation-adapter maintenance result in the active AI trace files and kept the backlog/history split intact.
 - Result: The current trace now reflects the completed TODO cleanup checkpoint; validation for this doc-only update is `make quality-ai-workflow` and `git diff --check`.
 
+## 2026-05-02 - Close remaining P3 TODO guardrail
+- State: Done
+- Scope: maintainer-only AI trace cleanup for the remaining P3 TODO guardrail and the next review-adapter consumption backlog item. Rust behavior is unchanged.
+- Current Update: Captured the closed P3 guardrail in the active trace and recorded a concrete backlog note to consume the review-adapter output in the next pass.
+- Result: The active trace stays current for docs/TODO cleanup only; validation for this doc-only update is `make quality-ai-workflow` and `git diff --check`.
+
 ## 2026-05-02 - Extend mutation action adapters
 - State: Done
 - Scope: Rust internal review projections/envelopes for access import dry-run, datasource import dry-run, datasource live mutation preview, and alert plan rows; focused domain tests; full Rust validation; TODO trace. Public JSON, CLI behavior, `ReviewRisk`, `ReviewRequest`, legacy dashboard import dry-run, generated docs, and Python implementation are out of scope.
@@ -54,10 +60,3 @@ Current AI-maintained status only.
 - Baseline: Dashboard, datasource, access staged, and selected live producers already used the internal `StatusProducer` model, while staged alert/sync/promotion and live alert/access/sync/promotion document-backed rows still built `StatusReading` directly before feeding shared status aggregation.
 - Current Update: Converted the document-backed staged/live status builders to domain-owned `StatusProducer` inputs and left read-failed, multi-org merge, and transport-only fallback rows outside the producer trait.
 - Result: Focused producer tests, full Rust tests, clippy, and AI workflow validation pass.
-
-## 2026-04-26 - Prove provisioning remains derived dashboard projection
-- State: Done
-- Scope: Rust dashboard compare/import regression tests, sync bundle dashboard source guard, focused tests, and TODO trace. Public JSON, generated docs, and dashboard v2 support are out of scope.
-- Baseline: Provisioning was already a file-backed export lane, but TODO still needed regression evidence that it is not the canonical dashboard contract.
-- Current Update: Added compare tests proving raw export wrappers and provisioning projections normalize to the same classic dashboard payload, and added a sync bundle guard that rejects explicit dual dashboard raw/provisioning inputs.
-- Result: Focused compare, source-loader, sync bundle, and import dry-run tests pass.
