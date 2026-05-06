@@ -21,6 +21,12 @@ Current AI change log only.
 - Older entries moved to [`ai-changes-archive-2026-04-28.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-changes-archive-2026-04-28.md).
 - Older entries moved to [`ai-changes-archive-2026-05-02.md`](/Users/ken/work/grafana-utils/docs/internal/archive/ai-changes-archive-2026-05-02.md).
 
+## 2026-05-02 - Cleanup TODO trace after mutation adapter pass
+- Summary: refreshed the active AI trace entry after the mutation adapter pass and kept this as docs/TODO cleanup only.
+- Tests: no Rust tests were needed for this documentation-only update. Validation should be `make quality-ai-workflow` and `git diff --check`.
+- Impact: `docs/internal/ai-status.md`, `docs/internal/ai-changes.md`, and the current AI trace only. Rust behavior, public JSON, CLI behavior, generated docs, and Python implementation are intentionally unchanged.
+- Rollback/Risk: low documentation-only change. Rollback would remove the refreshed TODO trace note and restore the previous active trace state.
+
 ## 2026-05-02 - Extend mutation action adapters
 - Summary: added internal `ReviewMutationAction` projections/envelopes for access import dry-run, datasource import dry-run, datasource live mutation preview, and alert plan rows without changing public JSON.
 - Tests: followed TDD in worker slices for access, datasource import, datasource live mutation, and alert plan adapters; then ran focused adapter tests, broader access/datasource/alert filters, and full Rust validation.
@@ -87,10 +93,3 @@ Current AI change log only.
 - Test Run: `cargo test --manifest-path rust/Cargo.toml workspace_roots_are_treated_as_local_browse_sources --quiet`; `cargo test --manifest-path rust/Cargo.toml build_sync_apply_intent_document_preserves_dashboard_ownership_provenance --quiet`; `cargo test --manifest-path rust/Cargo.toml execute_live_apply_with_request_blocks_git_sync_dashboard_from_apply_intent_handoff --quiet`; `cargo test --manifest-path rust/Cargo.toml execute_sync_command_rejects_live_apply_reusable_output --quiet`.
 - Impact: `rust/src/commands/dashboard/browse/mod.rs`, `rust/src/commands/dashboard/browse/tui.rs`, `rust/src/commands/sync/rust_tests.rs`, `rust/src/commands/sync/live_rust_tests.rs`, `rust/src/commands/sync/cli_rust_tests.rs`, `todo.md`, and AI trace docs. Public JSON, generated docs, Python implementation, and actual Git PR automation are intentionally unchanged.
 - Rollback/Risk: low behavior-boundary fix. Rollback would make workspace-backed local browse trees depend on the older `input_dir`-only local-mode check and would remove the sync handoff regressions.
-
-## 2026-04-26 - Add dashboard v2 adapter boundary regressions
-- Summary: added adapter-facing regression coverage so classic dashboard diff and root-export source-wrapper paths reject Grafana dashboard v2 resources before any remote compare or normalized temp import source can blur the future adapter boundary.
-- Tests: covered raw diff rejection, provisioning diff rejection, root raw export normalization rejection, and root provisioning export normalization rejection using the shared Grafana-source `v2-elements` fixture.
-- Test Run: `cargo test --manifest-path rust/Cargo.toml --quiet diff_dashboards_with_client_rejects_raw_dashboard_v2_resource_before_remote_compare`; `cargo test --manifest-path rust/Cargo.toml --quiet diff_dashboards_with_client_rejects_provisioning_dashboard_v2_resource_before_remote_compare`; `cargo test --manifest-path rust/Cargo.toml --quiet import_loaded_source_rust_tests`; `cargo fmt --manifest-path rust/Cargo.toml --all --check`.
-- Impact: `rust/src/commands/dashboard/export_diff_rust_tests.rs`, `rust/src/commands/dashboard/import_loaded_source_rust_tests.rs`, `todo.md`, and AI trace docs. Public CLI/docs, generated artifacts, Python implementation, and actual dashboard v2 support are intentionally unchanged.
-- Rollback/Risk: low test-only boundary hardening. Rollback would remove the regression coverage and reopen a gap around future adapter entrypoints without changing current classic-lane behavior.

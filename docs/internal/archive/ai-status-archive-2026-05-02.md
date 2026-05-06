@@ -20,3 +20,10 @@
 - Baseline: The dashboard re-layering inventory identified root-level `prompt*.rs` files as a shared prompt-lane transform boundary used by live export and offline raw-to-prompt.
 - Current Update: Moved the prompt transform and helper files under `rust/src/commands/dashboard/export_prompt/`, kept `commands/dashboard/mod.rs` as the public facade, and rewired direct consumers plus test support to the new module.
 - Result: Focused raw-to-prompt, export prompt, inventory, library-panel, and export-diff tests pass; full Rust validation is run for the commit.
+
+## 2026-04-27 - Refresh dashboard directory re-layering inventory
+- State: Done
+- Scope: Maintainer-only dashboard directory inventory, hotspot summary, future move candidates, validation guidance, and TODO trace. Code moves, public CLI/docs, generated docs, and runtime behavior are out of scope.
+- Baseline: The dashboard directory re-layering TODO required a fresh inventory before any later move, and recent ownership/Git Sync/permission boundary work changed the best next candidates.
+- Current Update: Added `docs/internal/dashboard-directory-relayering-inventory.md` with mixed-responsibility files, stable boundaries, and candidate future moves for prompt-lane transform, export-org source discovery, and status live collector namespace cleanup.
+- Result: The inventory checkpoint is complete; actual `git mv` work remains gated behind one-boundary-per-commit guardrails.

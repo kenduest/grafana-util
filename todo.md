@@ -410,11 +410,11 @@ Action:
 - [x] Keep legacy dashboard import dry-run out of the adapter until its
   `would-skip-*` / `would-fail-*` actions can be mapped without hiding
   operator-facing reasons.
-- [ ] Keep `ReviewRisk` blocked until at least one non-dashboard mutation
-  review domain emits stable `severity`, `category`, and `recommendation`
-  fields.
-- [ ] Keep `ReviewRequest` blocked until at least two domains need the same
-  request layer and fields.
+- [x] Keep `ReviewRisk` blocked: do not lift it until a non-dashboard
+  mutation review domain emits stable `severity`, `category`, and
+  `recommendation` fields.
+- [x] Keep `ReviewRequest` blocked: do not lift it until at least two domains
+  need the same request layer and fields.
 - [x] Keep domain-specific payloads behind a shared review wrapper for the
   current adapter pass.
 - [x] Avoid changing public JSON contracts in the current adapter pass.
@@ -436,9 +436,9 @@ Current evidence:
 
 Validation:
 
-- [ ] Run domain-focused tests first.
-- [ ] Run full `cargo test --manifest-path rust/Cargo.toml --quiet` after shared envelope changes.
-- [ ] Run `make quality-output-contracts` if JSON output changes.
+- [x] Run domain-focused tests first.
+- [x] Run full `cargo test --manifest-path rust/Cargo.toml --quiet` after shared envelope changes.
+- [x] `make quality-output-contracts` not required; public JSON did not change.
 
 ## P3 - Product Surface Balance
 

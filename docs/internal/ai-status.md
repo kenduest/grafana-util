@@ -21,6 +21,12 @@ Current AI-maintained status only.
 - Older entries moved to [`ai-status-archive-2026-04-28.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-28.md).
 - Older entries moved to [`ai-status-archive-2026-05-02.md`](/Users/ken/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-05-02.md).
 
+## 2026-05-02 - Cleanup TODO trace after mutation adapter pass
+- State: Done
+- Scope: maintainer-only TODO cleanup and AI trace refresh after the mutation adapter pass. Rust behavior, public JSON, CLI behavior, generated docs, and Python implementation are out of scope.
+- Current Update: Recorded the latest mutation-adapter maintenance result in the active AI trace files and kept the backlog/history split intact.
+- Result: The current trace now reflects the completed TODO cleanup checkpoint; validation for this doc-only update is `make quality-ai-workflow` and `git diff --check`.
+
 ## 2026-05-02 - Extend mutation action adapters
 - State: Done
 - Scope: Rust internal review projections/envelopes for access import dry-run, datasource import dry-run, datasource live mutation preview, and alert plan rows; focused domain tests; full Rust validation; TODO trace. Public JSON, CLI behavior, `ReviewRisk`, `ReviewRequest`, legacy dashboard import dry-run, generated docs, and Python implementation are out of scope.
@@ -55,10 +61,3 @@ Current AI-maintained status only.
 - Baseline: Provisioning was already a file-backed export lane, but TODO still needed regression evidence that it is not the canonical dashboard contract.
 - Current Update: Added compare tests proving raw export wrappers and provisioning projections normalize to the same classic dashboard payload, and added a sync bundle guard that rejects explicit dual dashboard raw/provisioning inputs.
 - Result: Focused compare, source-loader, sync bundle, and import dry-run tests pass.
-
-## 2026-04-27 - Refresh dashboard directory re-layering inventory
-- State: Done
-- Scope: Maintainer-only dashboard directory inventory, hotspot summary, future move candidates, validation guidance, and TODO trace. Code moves, public CLI/docs, generated docs, and runtime behavior are out of scope.
-- Baseline: The dashboard directory re-layering TODO required a fresh inventory before any later move, and recent ownership/Git Sync/permission boundary work changed the best next candidates.
-- Current Update: Added `docs/internal/dashboard-directory-relayering-inventory.md` with mixed-responsibility files, stable boundaries, and candidate future moves for prompt-lane transform, export-org source discovery, and status live collector namespace cleanup.
-- Result: The inventory checkpoint is complete; actual `git mv` work remains gated behind one-boundary-per-commit guardrails.
