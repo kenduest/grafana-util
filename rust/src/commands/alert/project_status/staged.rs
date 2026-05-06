@@ -11,7 +11,7 @@
 use serde_json::Value;
 
 use crate::project_status::{ProjectDomainStatus, PROJECT_STATUS_PARTIAL, PROJECT_STATUS_READY};
-use crate::project_status_model::{StatusReading, StatusRecordCount};
+use crate::project_status_model::{StatusProducer, StatusReading, StatusRecordCount};
 
 const ALERT_DOMAIN_ID: &str = "alert";
 const ALERT_SCOPE: &str = "staged";
@@ -45,6 +45,11 @@ const ALERT_WARNING_MISSING_CONTACT_POINTS: &str = "missing-contact-points";
 const ALERT_WARNING_MISSING_POLICIES: &str = "missing-policies";
 const ALERT_WARNING_MISSING_MUTE_TIMINGS: &str = "missing-mute-timings";
 const ALERT_WARNING_MISSING_TEMPLATES: &str = "missing-templates";
+
+#[derive(Debug, Clone, Copy)]
+struct AlertDomainStatusInputs<'a> {
+    summary_document: Option<&'a Value>,
+}
 
 fn summary_number(document: &Value, key: &str) -> usize {
     document
@@ -80,71 +85,75 @@ fn add_missing_supporting_surface_signal(
 pub(crate) fn build_alert_project_status_domain(
     summary_document: Option<&Value>,
 ) -> Option<ProjectDomainStatus> {
-    let document = summary_document?;
-    let rules = summary_number(document, "ruleCount");
-    let contact_points = summary_number(document, "contactPointCount");
-    let policies = summary_number(document, "policyCount");
+    AlertDomainStatusInputs { summary_document }.project_domain_status()
+}
 
-    let primary_count = rules.max(contact_points).max(policies);
-    let is_partial = primary_count == 0;
-    let (status, reason_code, next_actions) = if is_partial {
-        (
-            PROJECT_STATUS_PARTIAL,
-            ALERT_REASON_PARTIAL_NO_DATA,
-            ALERT_EXPORT_AT_LEAST_ONE_ACTIONS,
-        )
-    } else {
-        (
-            PROJECT_STATUS_READY,
-            ALERT_REASON_READY,
-            ALERT_REEXPORT_AFTER_CHANGES_ACTIONS,
-        )
-    };
+impl<'a> StatusProducer for AlertDomainStatusInputs<'a> {
+    fn status_reading(self) -> Option<StatusReading> {
+        let document = self.summary_document?;
+        let rules = summary_number(document, "ruleCount");
+        let contact_points = summary_number(document, "contactPointCount");
+        let policies = summary_number(document, "policyCount");
 
-    let mut warnings = Vec::new();
-    let mut next_actions = next_actions
-        .iter()
-        .map(|item| (*item).to_string())
-        .collect::<Vec<String>>();
-    add_missing_supporting_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        rules,
-        contact_points,
-        ALERT_WARNING_MISSING_CONTACT_POINTS,
-        "summary.contactPointCount",
-        ALERT_MISSING_CONTACT_POINTS_ACTIONS,
-    );
-    add_missing_supporting_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        rules,
-        policies,
-        ALERT_WARNING_MISSING_POLICIES,
-        "summary.policyCount",
-        ALERT_MISSING_POLICIES_ACTIONS,
-    );
-    add_missing_supporting_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        primary_count,
-        summary_number(document, "muteTimingCount"),
-        ALERT_WARNING_MISSING_MUTE_TIMINGS,
-        "summary.muteTimingCount",
-        ALERT_MISSING_MUTE_TIMINGS_ACTIONS,
-    );
-    add_missing_supporting_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        primary_count,
-        summary_number(document, "templateCount"),
-        ALERT_WARNING_MISSING_TEMPLATES,
-        "summary.templateCount",
-        ALERT_MISSING_TEMPLATES_ACTIONS,
-    );
+        let primary_count = rules.max(contact_points).max(policies);
+        let is_partial = primary_count == 0;
+        let (status, reason_code, next_actions) = if is_partial {
+            (
+                PROJECT_STATUS_PARTIAL,
+                ALERT_REASON_PARTIAL_NO_DATA,
+                ALERT_EXPORT_AT_LEAST_ONE_ACTIONS,
+            )
+        } else {
+            (
+                PROJECT_STATUS_READY,
+                ALERT_REASON_READY,
+                ALERT_REEXPORT_AFTER_CHANGES_ACTIONS,
+            )
+        };
 
-    Some(
-        StatusReading {
+        let mut warnings = Vec::new();
+        let mut next_actions = next_actions
+            .iter()
+            .map(|item| (*item).to_string())
+            .collect::<Vec<String>>();
+        add_missing_supporting_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            rules,
+            contact_points,
+            ALERT_WARNING_MISSING_CONTACT_POINTS,
+            "summary.contactPointCount",
+            ALERT_MISSING_CONTACT_POINTS_ACTIONS,
+        );
+        add_missing_supporting_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            rules,
+            policies,
+            ALERT_WARNING_MISSING_POLICIES,
+            "summary.policyCount",
+            ALERT_MISSING_POLICIES_ACTIONS,
+        );
+        add_missing_supporting_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            primary_count,
+            summary_number(document, "muteTimingCount"),
+            ALERT_WARNING_MISSING_MUTE_TIMINGS,
+            "summary.muteTimingCount",
+            ALERT_MISSING_MUTE_TIMINGS_ACTIONS,
+        );
+        add_missing_supporting_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            primary_count,
+            summary_number(document, "templateCount"),
+            ALERT_WARNING_MISSING_TEMPLATES,
+            "summary.templateCount",
+            ALERT_MISSING_TEMPLATES_ACTIONS,
+        );
+
+        Some(StatusReading {
             id: ALERT_DOMAIN_ID.to_string(),
             scope: ALERT_SCOPE.to_string(),
             mode: ALERT_MODE.to_string(),
@@ -163,9 +172,8 @@ pub(crate) fn build_alert_project_status_domain(
             warnings,
             next_actions,
             freshness: Default::default(),
-        }
-        .into_project_domain_status(),
-    )
+        })
+    }
 }
 
 #[cfg(test)]

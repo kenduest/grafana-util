@@ -1,5 +1,5 @@
 use crate::project_status::{ProjectDomainStatus, PROJECT_STATUS_PARTIAL, PROJECT_STATUS_READY};
-use crate::project_status_model::StatusReading;
+use crate::project_status_model::{StatusProducer, StatusReading};
 
 use super::{
     LiveReviewSignalGroup, LiveScopeReading, ACCESS_DOMAIN_ID, ACCESS_MODE,
@@ -66,35 +66,38 @@ fn build_next_actions(readings: &[LiveScopeReading], total_count: usize) -> Vec<
     next_actions
 }
 
-pub(super) fn build_access_live_domain_status_from_readings(
-    readings: &[LiveScopeReading],
-) -> Option<ProjectDomainStatus> {
-    let mut source_kinds = Vec::new();
-    let mut warnings = Vec::new();
-    let mut total_count = 0usize;
-    let mut unreadable_count = 0usize;
+#[derive(Debug, Clone, Copy)]
+struct AccessLiveDomainStatusInputs<'a> {
+    readings: &'a [LiveScopeReading],
+}
 
-    for reading in readings {
-        if let Some(source_kind) = reading.source_kind {
-            source_kinds.push(source_kind.to_string());
-            total_count += reading.count;
-        } else {
-            unreadable_count += 1;
+impl StatusProducer for AccessLiveDomainStatusInputs<'_> {
+    fn status_reading(self) -> Option<StatusReading> {
+        let mut source_kinds = Vec::new();
+        let mut warnings = Vec::new();
+        let mut total_count = 0usize;
+        let mut unreadable_count = 0usize;
+
+        for reading in self.readings {
+            if let Some(source_kind) = reading.source_kind {
+                source_kinds.push(source_kind.to_string());
+                total_count += reading.count;
+            } else {
+                unreadable_count += 1;
+            }
+            warnings.push(reading.finding());
+            warnings.extend(reading.review_signals.iter().map(|signal| signal.finding()));
         }
-        warnings.push(reading.finding());
-        warnings.extend(reading.review_signals.iter().map(|signal| signal.finding()));
-    }
 
-    let (status, reason_code) = if unreadable_count > 0 {
-        (PROJECT_STATUS_PARTIAL, ACCESS_REASON_PARTIAL_LIVE_SCOPES)
-    } else if total_count == 0 {
-        (PROJECT_STATUS_PARTIAL, ACCESS_REASON_PARTIAL_NO_DATA)
-    } else {
-        (PROJECT_STATUS_READY, ACCESS_REASON_READY)
-    };
+        let (status, reason_code) = if unreadable_count > 0 {
+            (PROJECT_STATUS_PARTIAL, ACCESS_REASON_PARTIAL_LIVE_SCOPES)
+        } else if total_count == 0 {
+            (PROJECT_STATUS_PARTIAL, ACCESS_REASON_PARTIAL_NO_DATA)
+        } else {
+            (PROJECT_STATUS_READY, ACCESS_REASON_READY)
+        };
 
-    Some(
-        StatusReading {
+        Some(StatusReading {
             id: ACCESS_DOMAIN_ID.to_string(),
             scope: ACCESS_SCOPE.to_string(),
             mode: ACCESS_MODE.to_string(),
@@ -108,9 +111,14 @@ pub(super) fn build_access_live_domain_status_from_readings(
                 .collect(),
             blockers: Vec::new(),
             warnings: warnings.into_iter().map(Into::into).collect(),
-            next_actions: build_next_actions(readings, total_count),
+            next_actions: build_next_actions(self.readings, total_count),
             freshness: Default::default(),
-        }
-        .into_project_domain_status(),
-    )
+        })
+    }
+}
+
+pub(super) fn build_access_live_domain_status_from_readings(
+    readings: &[LiveScopeReading],
+) -> Option<ProjectDomainStatus> {
+    AccessLiveDomainStatusInputs { readings }.project_domain_status()
 }

@@ -103,9 +103,12 @@ changes priority.
 - [x] P2: Revisit dashboard v2 as a separate adapter boundary. Continue
   rejecting v2-shaped input in the classic prompt lane until fixtures and tests
   prove a clean migration path.
-- P1: Normalize the status producer model only where a domain-owned signal
+- [x] P1: Normalize the status producer model only where a domain-owned signal
   already exists and can feed shared `status` aggregation without moving live
-  collection into the shared trait.
+  collection into the shared trait. Staged alert/sync/promotion and live
+  alert/access/sync/promotion document-backed status rows now delegate through
+  domain-owned `StatusProducer` inputs; read-failed, multi-org merge, and
+  transport-only fallback rows remain outside the trait.
 - [x] P2: Move the shared prompt-lane transform into a dedicated
   `dashboard/export_prompt/` boundary after the inventory identified it as the
   next mixed-responsibility hotspot.
@@ -334,8 +337,10 @@ Relevant areas:
 Action:
 
 - Keep live producer collection and multi-org transport outside the shared
-  trait; dashboard/datasource live status now share the producer adapter after
-  their domain inputs are collected.
+  trait; document-backed staged/live status rows now share the producer adapter
+  after their domain inputs are collected. Keep read-failed fallback and
+  transport-only placeholder rows as direct status construction until they gain
+  real domain-owned evidence.
 
 ## P1 - HTTP Transport Efficiency
 

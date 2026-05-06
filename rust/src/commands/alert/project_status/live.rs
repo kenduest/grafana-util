@@ -17,7 +17,7 @@ use super::value_to_string;
 use crate::project_status::{
     status_finding, ProjectDomainStatus, PROJECT_STATUS_PARTIAL, PROJECT_STATUS_READY,
 };
-use crate::project_status_model::{StatusReading, StatusRecordCount};
+use crate::project_status_model::{StatusProducer, StatusReading, StatusRecordCount};
 
 const ALERT_DOMAIN_ID: &str = "alert";
 const ALERT_SCOPE: &str = "live";
@@ -183,136 +183,138 @@ pub struct AlertLiveProjectStatusInputs<'a> {
 pub fn build_alert_live_project_status_domain(
     inputs: AlertLiveProjectStatusInputs<'_>,
 ) -> Option<ProjectDomainStatus> {
-    let rules = inputs.rules_document.map(array_count).unwrap_or(0);
-    let (linked_rules, panel_linked_rules, rule_count) = inputs
-        .rules_document
-        .map(rule_linkage_panel_counts)
-        .unwrap_or((0, 0, 0));
-    let contact_points = inputs.contact_points_document.map(array_count).unwrap_or(0);
-    let mute_timings = inputs.mute_timings_document.map(array_count).unwrap_or(0);
-    let policies = inputs.policies_document.map(object_count).unwrap_or(0);
-    let templates = inputs.templates_document.map(array_count).unwrap_or(0);
+    inputs.project_domain_status()
+}
 
-    let source_kinds = [
-        inputs.rules_document.map(|_| ALERT_SOURCE_KINDS[0]),
-        inputs
-            .contact_points_document
-            .map(|_| ALERT_SOURCE_KINDS[1]),
-        inputs.mute_timings_document.map(|_| ALERT_SOURCE_KINDS[2]),
-        inputs.policies_document.map(|_| ALERT_SOURCE_KINDS[3]),
-        inputs.templates_document.map(|_| ALERT_SOURCE_KINDS[4]),
-    ]
-    .into_iter()
-    .flatten()
-    .map(|item| item.to_string())
-    .collect::<Vec<String>>();
+impl<'a> StatusProducer for AlertLiveProjectStatusInputs<'a> {
+    fn status_reading(self) -> Option<StatusReading> {
+        let rules = self.rules_document.map(array_count).unwrap_or(0);
+        let (linked_rules, panel_linked_rules, rule_count) = self
+            .rules_document
+            .map(rule_linkage_panel_counts)
+            .unwrap_or((0, 0, 0));
+        let contact_points = self.contact_points_document.map(array_count).unwrap_or(0);
+        let mute_timings = self.mute_timings_document.map(array_count).unwrap_or(0);
+        let policies = self.policies_document.map(object_count).unwrap_or(0);
+        let templates = self.templates_document.map(array_count).unwrap_or(0);
 
-    if source_kinds.is_empty() {
-        return None;
-    }
+        let source_kinds = [
+            self.rules_document.map(|_| ALERT_SOURCE_KINDS[0]),
+            self.contact_points_document.map(|_| ALERT_SOURCE_KINDS[1]),
+            self.mute_timings_document.map(|_| ALERT_SOURCE_KINDS[2]),
+            self.policies_document.map(|_| ALERT_SOURCE_KINDS[3]),
+            self.templates_document.map(|_| ALERT_SOURCE_KINDS[4]),
+        ]
+        .into_iter()
+        .flatten()
+        .map(|item| item.to_string())
+        .collect::<Vec<String>>();
 
-    let primary_count = rules + contact_points + mute_timings + policies + templates;
-    let unlinked_rules = rule_count.saturating_sub(linked_rules);
-    let has_linked_rules = linked_rules > 0;
-    let mut blockers = Vec::new();
-    let mut warnings = Vec::new();
-    if rules > 0 && !has_linked_rules {
-        blockers.push(status_finding(
-            ALERT_BLOCKER_MISSING_LINKED_RULES,
-            1,
-            "live.ruleLinkedCount",
-        ));
-    } else if unlinked_rules > 0 {
-        warnings.push(status_finding(
-            "unlinked-alert-rules",
-            unlinked_rules,
-            "live.ruleUnlinkedCount",
-        ));
-    }
-    if has_linked_rules && policies == 0 {
-        blockers.push(status_finding(
-            ALERT_BLOCKER_MISSING_POLICY,
-            1,
-            "live.policyCount",
-        ));
-    }
+        if source_kinds.is_empty() {
+            return None;
+        }
 
-    let (status, reason_code, mut next_actions) = if rules == 0 {
-        (
-            PROJECT_STATUS_PARTIAL,
-            ALERT_REASON_PARTIAL_NO_DATA,
-            ALERT_EXPORT_AT_LEAST_ONE_ACTIONS
-                .iter()
-                .map(|item| (*item).to_string())
-                .collect::<Vec<String>>(),
-        )
-    } else if !blockers.is_empty() {
-        (
-            crate::project_status::PROJECT_STATUS_BLOCKED,
-            ALERT_REASON_BLOCKED_BY_BLOCKERS,
-            blockers
-                .iter()
-                .flat_map(|finding| blocker_actions(finding.kind.as_str()))
-                .map(|item| (*item).to_string())
-                .collect::<Vec<String>>(),
-        )
-    } else if unlinked_rules > 0 {
-        (
-            PROJECT_STATUS_READY,
-            ALERT_REASON_READY,
-            ALERT_LINK_REMAINING_RULES_ACTIONS
-                .iter()
-                .map(|item| (*item).to_string())
-                .collect::<Vec<String>>(),
-        )
-    } else {
-        (
-            PROJECT_STATUS_READY,
-            ALERT_REASON_READY,
-            ALERT_REFRESH_AFTER_CHANGES_ACTIONS
-                .iter()
-                .map(|item| (*item).to_string())
-                .collect::<Vec<String>>(),
-        )
-    };
+        let primary_count = rules + contact_points + mute_timings + policies + templates;
+        let unlinked_rules = rule_count.saturating_sub(linked_rules);
+        let has_linked_rules = linked_rules > 0;
+        let mut blockers = Vec::new();
+        let mut warnings = Vec::new();
+        if rules > 0 && !has_linked_rules {
+            blockers.push(status_finding(
+                ALERT_BLOCKER_MISSING_LINKED_RULES,
+                1,
+                "live.ruleLinkedCount",
+            ));
+        } else if unlinked_rules > 0 {
+            warnings.push(status_finding(
+                "unlinked-alert-rules",
+                unlinked_rules,
+                "live.ruleUnlinkedCount",
+            ));
+        }
+        if has_linked_rules && policies == 0 {
+            blockers.push(status_finding(
+                ALERT_BLOCKER_MISSING_POLICY,
+                1,
+                "live.policyCount",
+            ));
+        }
 
-    add_missing_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        has_linked_rules,
-        contact_points,
-        ALERT_WARNING_MISSING_CONTACT_POINTS,
-        "live.contactPointCount",
-        ALERT_MISSING_CONTACT_POINTS_ACTIONS,
-    );
-    add_missing_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        has_linked_rules,
-        mute_timings,
-        ALERT_WARNING_MISSING_MUTE_TIMINGS,
-        "live.muteTimingCount",
-        ALERT_MISSING_MUTE_TIMINGS_ACTIONS,
-    );
-    add_missing_surface_signal(
-        &mut warnings,
-        &mut next_actions,
-        has_linked_rules,
-        templates,
-        ALERT_WARNING_MISSING_TEMPLATES,
-        "live.templateCount",
-        ALERT_MISSING_TEMPLATES_ACTIONS,
-    );
-    add_missing_panel_link_signal(
-        &mut warnings,
-        &mut next_actions,
-        has_linked_rules,
-        linked_rules,
-        panel_linked_rules,
-    );
+        let (status, reason_code, mut next_actions) = if rules == 0 {
+            (
+                PROJECT_STATUS_PARTIAL,
+                ALERT_REASON_PARTIAL_NO_DATA,
+                ALERT_EXPORT_AT_LEAST_ONE_ACTIONS
+                    .iter()
+                    .map(|item| (*item).to_string())
+                    .collect::<Vec<String>>(),
+            )
+        } else if !blockers.is_empty() {
+            (
+                crate::project_status::PROJECT_STATUS_BLOCKED,
+                ALERT_REASON_BLOCKED_BY_BLOCKERS,
+                blockers
+                    .iter()
+                    .flat_map(|finding| blocker_actions(finding.kind.as_str()))
+                    .map(|item| (*item).to_string())
+                    .collect::<Vec<String>>(),
+            )
+        } else if unlinked_rules > 0 {
+            (
+                PROJECT_STATUS_READY,
+                ALERT_REASON_READY,
+                ALERT_LINK_REMAINING_RULES_ACTIONS
+                    .iter()
+                    .map(|item| (*item).to_string())
+                    .collect::<Vec<String>>(),
+            )
+        } else {
+            (
+                PROJECT_STATUS_READY,
+                ALERT_REASON_READY,
+                ALERT_REFRESH_AFTER_CHANGES_ACTIONS
+                    .iter()
+                    .map(|item| (*item).to_string())
+                    .collect::<Vec<String>>(),
+            )
+        };
 
-    Some(
-        StatusReading {
+        add_missing_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            has_linked_rules,
+            contact_points,
+            ALERT_WARNING_MISSING_CONTACT_POINTS,
+            "live.contactPointCount",
+            ALERT_MISSING_CONTACT_POINTS_ACTIONS,
+        );
+        add_missing_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            has_linked_rules,
+            mute_timings,
+            ALERT_WARNING_MISSING_MUTE_TIMINGS,
+            "live.muteTimingCount",
+            ALERT_MISSING_MUTE_TIMINGS_ACTIONS,
+        );
+        add_missing_surface_signal(
+            &mut warnings,
+            &mut next_actions,
+            has_linked_rules,
+            templates,
+            ALERT_WARNING_MISSING_TEMPLATES,
+            "live.templateCount",
+            ALERT_MISSING_TEMPLATES_ACTIONS,
+        );
+        add_missing_panel_link_signal(
+            &mut warnings,
+            &mut next_actions,
+            has_linked_rules,
+            linked_rules,
+            panel_linked_rules,
+        );
+
+        Some(StatusReading {
             id: ALERT_DOMAIN_ID.to_string(),
             scope: ALERT_SCOPE.to_string(),
             mode: ALERT_MODE.to_string(),
@@ -328,9 +330,8 @@ pub fn build_alert_live_project_status_domain(
             warnings: warnings.into_iter().map(Into::into).collect(),
             next_actions,
             freshness: Default::default(),
-        }
-        .into_project_domain_status(),
-    )
+        })
+    }
 }
 
 pub fn build_alert_live_read_failed_domain_status(

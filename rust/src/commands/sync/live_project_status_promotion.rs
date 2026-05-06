@@ -17,7 +17,7 @@ use crate::project_status::{
     status_finding, ProjectDomainStatus, ProjectStatusFinding, PROJECT_STATUS_BLOCKED,
     PROJECT_STATUS_PARTIAL, PROJECT_STATUS_READY,
 };
-use crate::project_status_model::StatusReading;
+use crate::project_status_model::{StatusProducer, StatusReading};
 
 use super::project_status_json::{
     push_unique, section_bool, section_object, section_text, summary_number, value_array_count,
@@ -293,118 +293,122 @@ fn build_next_actions(
 pub(crate) fn build_live_promotion_project_status(
     inputs: LivePromotionProjectStatusInputs<'_>,
 ) -> Option<ProjectDomainStatus> {
-    if inputs.promotion_summary_document.is_none()
-        && inputs.promotion_mapping_document.is_none()
-        && inputs.availability_document.is_none()
-    {
-        return None;
-    }
+    inputs.project_domain_status()
+}
 
-    let resource_count = inputs
-        .promotion_summary_document
-        .map(|document| summary_number(document, summary_key::RESOURCE_COUNT))
-        .unwrap_or(0);
-    let summary_present = inputs.promotion_summary_document.is_some();
-    let missing_mapping_count = inputs
-        .promotion_summary_document
-        .map(|document| summary_number(document, summary_key::MISSING_MAPPING_COUNT))
-        .unwrap_or(0);
-    let bundle_blocking_count = inputs
-        .promotion_summary_document
-        .map(|document| summary_number(document, summary_key::BUNDLE_BLOCKING_COUNT))
-        .unwrap_or(0);
-    let blocking_count = inputs
-        .promotion_summary_document
-        .map(|document| summary_number(document, summary_key::BLOCKING_COUNT))
-        .unwrap_or(0);
-    let mapping_count = mapping_entry_count(inputs.promotion_mapping_document);
-    let availability_count = availability_entry_count(inputs.availability_document);
+impl StatusProducer for LivePromotionProjectStatusInputs<'_> {
+    fn status_reading(self) -> Option<StatusReading> {
+        if self.promotion_summary_document.is_none()
+            && self.promotion_mapping_document.is_none()
+            && self.availability_document.is_none()
+        {
+            return None;
+        }
 
-    let mut source_kinds = Vec::new();
-    if inputs.promotion_summary_document.is_some() {
-        source_kinds.push(LIVE_PROMOTION_SOURCE_KINDS[0].to_string());
-    }
-    if inputs.promotion_mapping_document.is_some() {
-        source_kinds.push(LIVE_PROMOTION_SOURCE_KINDS[1].to_string());
-    }
-    if inputs.availability_document.is_some() {
-        source_kinds.push(LIVE_PROMOTION_SOURCE_KINDS[2].to_string());
-    }
+        let resource_count = self
+            .promotion_summary_document
+            .map(|document| summary_number(document, summary_key::RESOURCE_COUNT))
+            .unwrap_or(0);
+        let summary_present = self.promotion_summary_document.is_some();
+        let missing_mapping_count = self
+            .promotion_summary_document
+            .map(|document| summary_number(document, summary_key::MISSING_MAPPING_COUNT))
+            .unwrap_or(0);
+        let bundle_blocking_count = self
+            .promotion_summary_document
+            .map(|document| summary_number(document, summary_key::BUNDLE_BLOCKING_COUNT))
+            .unwrap_or(0);
+        let blocking_count = self
+            .promotion_summary_document
+            .map(|document| summary_number(document, summary_key::BLOCKING_COUNT))
+            .unwrap_or(0);
+        let mapping_count = mapping_entry_count(self.promotion_mapping_document);
+        let availability_count = availability_entry_count(self.availability_document);
 
-    let mut blockers = Vec::new();
-    if missing_mapping_count > 0 {
-        blockers.push(status_finding(
-            LIVE_PROMOTION_BLOCKER_MISSING_MAPPINGS,
-            missing_mapping_count,
-            signal::SUMMARY_MISSING_MAPPING_COUNT,
-        ));
-    }
-    if bundle_blocking_count > 0 {
-        blockers.push(status_finding(
-            LIVE_PROMOTION_BLOCKER_BUNDLE_BLOCKING,
-            bundle_blocking_count,
-            signal::SUMMARY_BUNDLE_BLOCKING_COUNT,
-        ));
-    }
-    if blockers.is_empty() && blocking_count > 0 {
-        blockers.push(status_finding(
-            LIVE_PROMOTION_BLOCKER_BLOCKING,
-            blocking_count,
-            signal::SUMMARY_BLOCKING_COUNT,
-        ));
-    }
+        let mut source_kinds = Vec::new();
+        if self.promotion_summary_document.is_some() {
+            source_kinds.push(LIVE_PROMOTION_SOURCE_KINDS[0].to_string());
+        }
+        if self.promotion_mapping_document.is_some() {
+            source_kinds.push(LIVE_PROMOTION_SOURCE_KINDS[1].to_string());
+        }
+        if self.availability_document.is_some() {
+            source_kinds.push(LIVE_PROMOTION_SOURCE_KINDS[2].to_string());
+        }
 
-    let mut warnings = Vec::new();
-    let mut evidence_actions = Vec::new();
-    add_handoff_evidence(
-        inputs.promotion_summary_document,
-        &mut warnings,
-        &mut evidence_actions,
-    );
-    add_continuation_evidence(
-        inputs.promotion_summary_document,
-        &mut warnings,
-        &mut evidence_actions,
-    );
+        let mut blockers = Vec::new();
+        if missing_mapping_count > 0 {
+            blockers.push(status_finding(
+                LIVE_PROMOTION_BLOCKER_MISSING_MAPPINGS,
+                missing_mapping_count,
+                signal::SUMMARY_MISSING_MAPPING_COUNT,
+            ));
+        }
+        if bundle_blocking_count > 0 {
+            blockers.push(status_finding(
+                LIVE_PROMOTION_BLOCKER_BUNDLE_BLOCKING,
+                bundle_blocking_count,
+                signal::SUMMARY_BUNDLE_BLOCKING_COUNT,
+            ));
+        }
+        if blockers.is_empty() && blocking_count > 0 {
+            blockers.push(status_finding(
+                LIVE_PROMOTION_BLOCKER_BLOCKING,
+                blocking_count,
+                signal::SUMMARY_BLOCKING_COUNT,
+            ));
+        }
 
-    let (status, reason_code, next_actions) = if !blockers.is_empty() {
-        (
-            PROJECT_STATUS_BLOCKED,
-            LIVE_PROMOTION_REASON_BLOCKED_BY_BLOCKERS,
-            LIVE_PROMOTION_RESOLVE_BLOCKERS_ACTIONS
-                .iter()
-                .map(|item| (*item).to_string())
-                .collect::<Vec<String>>(),
-        )
-    } else if !summary_present
-        || resource_count == 0
-        || mapping_count == 0
-        || availability_count == 0
-    {
-        let mut next_actions = build_next_actions(
-            summary_present,
-            inputs.promotion_mapping_document.is_some(),
-            inputs.availability_document.is_some(),
-            resource_count,
-            mapping_count,
-            availability_count,
+        let mut warnings = Vec::new();
+        let mut evidence_actions = Vec::new();
+        add_handoff_evidence(
+            self.promotion_summary_document,
+            &mut warnings,
+            &mut evidence_actions,
         );
-        next_actions.extend(evidence_actions);
-        (
-            PROJECT_STATUS_PARTIAL,
-            LIVE_PROMOTION_REASON_PARTIAL_NO_DATA,
-            next_actions,
-        )
-    } else {
-        (
-            PROJECT_STATUS_READY,
-            LIVE_PROMOTION_REASON_READY,
-            evidence_actions,
-        )
-    };
+        add_continuation_evidence(
+            self.promotion_summary_document,
+            &mut warnings,
+            &mut evidence_actions,
+        );
 
-    Some(
-        StatusReading {
+        let (status, reason_code, next_actions) = if !blockers.is_empty() {
+            (
+                PROJECT_STATUS_BLOCKED,
+                LIVE_PROMOTION_REASON_BLOCKED_BY_BLOCKERS,
+                LIVE_PROMOTION_RESOLVE_BLOCKERS_ACTIONS
+                    .iter()
+                    .map(|item| (*item).to_string())
+                    .collect::<Vec<String>>(),
+            )
+        } else if !summary_present
+            || resource_count == 0
+            || mapping_count == 0
+            || availability_count == 0
+        {
+            let mut next_actions = build_next_actions(
+                summary_present,
+                self.promotion_mapping_document.is_some(),
+                self.availability_document.is_some(),
+                resource_count,
+                mapping_count,
+                availability_count,
+            );
+            next_actions.extend(evidence_actions);
+            (
+                PROJECT_STATUS_PARTIAL,
+                LIVE_PROMOTION_REASON_PARTIAL_NO_DATA,
+                next_actions,
+            )
+        } else {
+            (
+                PROJECT_STATUS_READY,
+                LIVE_PROMOTION_REASON_READY,
+                evidence_actions,
+            )
+        };
+
+        Some(StatusReading {
             id: LIVE_PROMOTION_DOMAIN_ID.to_string(),
             scope: LIVE_PROMOTION_SCOPE.to_string(),
             mode: LIVE_PROMOTION_MODE.to_string(),
@@ -420,7 +424,6 @@ pub(crate) fn build_live_promotion_project_status(
             warnings: warnings.into_iter().map(Into::into).collect(),
             next_actions,
             freshness: Default::default(),
-        }
-        .into_project_domain_status(),
-    )
+        })
+    }
 }

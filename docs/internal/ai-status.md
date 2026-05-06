@@ -18,6 +18,14 @@ Current AI-maintained status only.
 - Older entries moved to [`ai-status-archive-2026-04-20.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-20.md).
 - Older entries moved to [`ai-status-archive-2026-04-26.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-26.md).
 - Older entries moved to [`ai-status-archive-2026-04-27.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-27.md).
+- Older entries moved to [`ai-status-archive-2026-04-28.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-28.md).
+
+## 2026-04-28 - Normalize status producers
+- State: Done
+- Scope: Rust staged/live project-status producer adapters for domain-owned alert/access/sync/promotion signals, focused status tests, full Rust validation, TODO trace, and AI workflow validation. Public JSON, generated docs, live collection transport, and Python implementation are out of scope.
+- Baseline: Dashboard, datasource, access staged, and selected live producers already used the internal `StatusProducer` model, while staged alert/sync/promotion and live alert/access/sync/promotion document-backed rows still built `StatusReading` directly before feeding shared status aggregation.
+- Current Update: Converted the document-backed staged/live status builders to domain-owned `StatusProducer` inputs and left read-failed, multi-org merge, and transport-only fallback rows outside the producer trait.
+- Result: Focused producer tests, full Rust tests, clippy, and AI workflow validation pass.
 
 ## 2026-04-26 - Prove provisioning remains derived dashboard projection
 - State: Done
@@ -53,10 +61,3 @@ Current AI-maintained status only.
 - Baseline: Sync live apply already blocked file-provisioned and Git Sync-owned dashboards, but workspace-backed dashboard browse trees did not share the same local-mode detection as explicit `--input-dir` local browse trees.
 - Current Update: Centralized dashboard browse local-source detection so `--workspace` Git Sync review trees use read-only local mode, and added sync regressions proving Git Sync dashboard ownership survives apply-intent handoff and blocks live transport.
 - Result: Focused browse, sync apply-intent, live-apply, and reusable-output tests pass.
-
-## 2026-04-26 - Add dashboard v2 adapter boundary regressions
-- State: Done
-- Scope: Rust dashboard diff/import source-wrapper regression tests, focused validation, and TODO trace. Public JSON, generated docs, classic dashboard behavior, and actual v2 adapter support are out of scope.
-- Baseline: Classic raw/provisioning import and plan lanes already rejected dashboard v2 resources, but adapter-facing diff and root-export normalization paths still lacked dedicated regression coverage.
-- Current Update: Added diff-lane tests proving raw and provisioning compare entrypoints reject dashboard v2 input before any remote compare request runs, and added import source-wrapper tests proving root export normalization into temp raw/provisioning variants still rejects v2 payloads.
-- Result: Focused export-diff and import-loaded-source tests pass, and the remaining v2 adapter-boundary TODO is now satisfied.

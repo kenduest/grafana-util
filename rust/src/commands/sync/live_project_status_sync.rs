@@ -15,7 +15,7 @@ use crate::project_status::{
     status_finding, ProjectDomainStatus, PROJECT_STATUS_BLOCKED, PROJECT_STATUS_PARTIAL,
     PROJECT_STATUS_READY,
 };
-use crate::project_status_model::StatusReading;
+use crate::project_status_model::{StatusProducer, StatusReading};
 
 use super::project_status_json::summary_number;
 
@@ -131,139 +131,145 @@ fn next_actions_for_ready(warnings_present: bool) -> Vec<String> {
 pub(crate) fn build_live_sync_domain_status(
     inputs: SyncLiveProjectStatusInputs<'_>,
 ) -> Option<ProjectDomainStatus> {
-    if inputs.summary_document.is_none() && inputs.bundle_preflight_document.is_none() {
-        return None;
-    }
+    inputs.project_domain_status()
+}
 
-    let mut source_kinds = Vec::new();
-    let mut signal_keys = Vec::new();
-    if inputs.summary_document.is_some() {
-        source_kinds.push(SYNC_SOURCE_KIND_SUMMARY.to_string());
-    }
-
-    let mut blockers = Vec::new();
-    let mut warnings = Vec::new();
-
-    let (resources, status, reason_code, next_actions) = if let Some(document) =
-        inputs.bundle_preflight_document
-    {
-        source_kinds.push(SYNC_SOURCE_KIND_BUNDLE_PREFLIGHT.to_string());
-        signal_keys.extend(
-            SYNC_SIGNAL_KEYS_BUNDLE_PREFLIGHT
-                .iter()
-                .map(|item| (*item).to_string()),
-        );
-
-        let resources = summary_number(document, summary_key::RESOURCE_COUNT);
-        let sync_blocking = summary_number(document, summary_key::SYNC_BLOCKING_COUNT);
-        let provider_blocking = summary_number(document, summary_key::PROVIDER_BLOCKING_COUNT);
-        let secret_blocking =
-            summary_number(document, summary_key::SECRET_PLACEHOLDER_BLOCKING_COUNT);
-        let alert_blocking = summary_number(document, summary_key::ALERT_ARTIFACT_BLOCKED_COUNT);
-        let alert_plan_only = summary_number(document, summary_key::ALERT_ARTIFACT_PLAN_ONLY_COUNT);
-        let bundle_blocking = summary_number(document, summary_key::BLOCKED_COUNT);
-        let bundle_plan_only = summary_number(document, summary_key::PLAN_ONLY_COUNT);
-
-        // Keep the bundle-preflight handoff signals visible even when a
-        // subset of them does not change the final status.
-        if sync_blocking > 0 {
-            blockers.push(status_finding(
-                SYNC_BLOCKER_SYNC_BLOCKING,
-                sync_blocking,
-                signal::SUMMARY_SYNC_BLOCKING_COUNT,
-            ));
-        }
-        if provider_blocking > 0 {
-            blockers.push(status_finding(
-                SYNC_BLOCKER_PROVIDER_BLOCKING,
-                provider_blocking,
-                signal::SUMMARY_PROVIDER_BLOCKING_COUNT,
-            ));
-        }
-        if secret_blocking > 0 {
-            blockers.push(status_finding(
-                SYNC_BLOCKER_SECRET_PLACEHOLDER_BLOCKING,
-                secret_blocking,
-                signal::SUMMARY_SECRET_PLACEHOLDER_BLOCKING_COUNT,
-            ));
-        }
-        if alert_blocking > 0 {
-            blockers.push(status_finding(
-                SYNC_BLOCKER_ALERT_ARTIFACT_BLOCKING,
-                alert_blocking,
-                signal::SUMMARY_ALERT_ARTIFACT_BLOCKED_COUNT,
-            ));
-        }
-        if blockers.is_empty() && bundle_blocking > 0 {
-            blockers.push(status_finding(
-                SYNC_BLOCKER_BUNDLE_BLOCKING,
-                bundle_blocking,
-                signal::SUMMARY_BLOCKED_COUNT,
-            ));
-        }
-        if alert_plan_only > 0 {
-            warnings.push(status_finding(
-                SYNC_WARNING_ALERT_ARTIFACT_PLAN_ONLY,
-                alert_plan_only,
-                signal::SUMMARY_ALERT_ARTIFACT_PLAN_ONLY_COUNT,
-            ));
-        } else if bundle_plan_only > 0 {
-            warnings.push(status_finding(
-                SYNC_WARNING_BUNDLE_PLAN_ONLY,
-                bundle_plan_only,
-                signal::SUMMARY_PLAN_ONLY_COUNT,
-            ));
+impl StatusProducer for SyncLiveProjectStatusInputs<'_> {
+    fn status_reading(self) -> Option<StatusReading> {
+        if self.summary_document.is_none() && self.bundle_preflight_document.is_none() {
+            return None;
         }
 
-        let has_blockers = !blockers.is_empty();
-        let has_warnings = !warnings.is_empty();
-        let next_actions = if has_blockers {
-            SYNC_RESOLVE_BLOCKERS_ACTIONS
-                .iter()
-                .map(|item| (*item).to_string())
-                .collect()
-        } else if resources == 0 {
-            next_actions_for_partial(resources, true)
+        let mut source_kinds = Vec::new();
+        let mut signal_keys = Vec::new();
+        if self.summary_document.is_some() {
+            source_kinds.push(SYNC_SOURCE_KIND_SUMMARY.to_string());
+        }
+
+        let mut blockers = Vec::new();
+        let mut warnings = Vec::new();
+
+        let (resources, status, reason_code, next_actions) = if let Some(document) =
+            self.bundle_preflight_document
+        {
+            source_kinds.push(SYNC_SOURCE_KIND_BUNDLE_PREFLIGHT.to_string());
+            signal_keys.extend(
+                SYNC_SIGNAL_KEYS_BUNDLE_PREFLIGHT
+                    .iter()
+                    .map(|item| (*item).to_string()),
+            );
+
+            let resources = summary_number(document, summary_key::RESOURCE_COUNT);
+            let sync_blocking = summary_number(document, summary_key::SYNC_BLOCKING_COUNT);
+            let provider_blocking = summary_number(document, summary_key::PROVIDER_BLOCKING_COUNT);
+            let secret_blocking =
+                summary_number(document, summary_key::SECRET_PLACEHOLDER_BLOCKING_COUNT);
+            let alert_blocking =
+                summary_number(document, summary_key::ALERT_ARTIFACT_BLOCKED_COUNT);
+            let alert_plan_only =
+                summary_number(document, summary_key::ALERT_ARTIFACT_PLAN_ONLY_COUNT);
+            let bundle_blocking = summary_number(document, summary_key::BLOCKED_COUNT);
+            let bundle_plan_only = summary_number(document, summary_key::PLAN_ONLY_COUNT);
+
+            // Keep the bundle-preflight handoff signals visible even when a
+            // subset of them does not change the final status.
+            if sync_blocking > 0 {
+                blockers.push(status_finding(
+                    SYNC_BLOCKER_SYNC_BLOCKING,
+                    sync_blocking,
+                    signal::SUMMARY_SYNC_BLOCKING_COUNT,
+                ));
+            }
+            if provider_blocking > 0 {
+                blockers.push(status_finding(
+                    SYNC_BLOCKER_PROVIDER_BLOCKING,
+                    provider_blocking,
+                    signal::SUMMARY_PROVIDER_BLOCKING_COUNT,
+                ));
+            }
+            if secret_blocking > 0 {
+                blockers.push(status_finding(
+                    SYNC_BLOCKER_SECRET_PLACEHOLDER_BLOCKING,
+                    secret_blocking,
+                    signal::SUMMARY_SECRET_PLACEHOLDER_BLOCKING_COUNT,
+                ));
+            }
+            if alert_blocking > 0 {
+                blockers.push(status_finding(
+                    SYNC_BLOCKER_ALERT_ARTIFACT_BLOCKING,
+                    alert_blocking,
+                    signal::SUMMARY_ALERT_ARTIFACT_BLOCKED_COUNT,
+                ));
+            }
+            if blockers.is_empty() && bundle_blocking > 0 {
+                blockers.push(status_finding(
+                    SYNC_BLOCKER_BUNDLE_BLOCKING,
+                    bundle_blocking,
+                    signal::SUMMARY_BLOCKED_COUNT,
+                ));
+            }
+            if alert_plan_only > 0 {
+                warnings.push(status_finding(
+                    SYNC_WARNING_ALERT_ARTIFACT_PLAN_ONLY,
+                    alert_plan_only,
+                    signal::SUMMARY_ALERT_ARTIFACT_PLAN_ONLY_COUNT,
+                ));
+            } else if bundle_plan_only > 0 {
+                warnings.push(status_finding(
+                    SYNC_WARNING_BUNDLE_PLAN_ONLY,
+                    bundle_plan_only,
+                    signal::SUMMARY_PLAN_ONLY_COUNT,
+                ));
+            }
+
+            let has_blockers = !blockers.is_empty();
+            let has_warnings = !warnings.is_empty();
+            let next_actions = if has_blockers {
+                SYNC_RESOLVE_BLOCKERS_ACTIONS
+                    .iter()
+                    .map(|item| (*item).to_string())
+                    .collect()
+            } else if resources == 0 {
+                next_actions_for_partial(resources, true)
+            } else {
+                next_actions_for_ready(has_warnings)
+            };
+            let status = if has_blockers {
+                PROJECT_STATUS_BLOCKED
+            } else if resources == 0 {
+                PROJECT_STATUS_PARTIAL
+            } else {
+                PROJECT_STATUS_READY
+            };
+            let reason_code = if has_blockers {
+                SYNC_REASON_BLOCKED_BY_BLOCKERS
+            } else if resources == 0 {
+                SYNC_REASON_PARTIAL_NO_DATA
+            } else {
+                SYNC_REASON_READY
+            };
+            (resources, status, reason_code, next_actions)
         } else {
-            next_actions_for_ready(has_warnings)
-        };
-        let status = if has_blockers {
-            PROJECT_STATUS_BLOCKED
-        } else if resources == 0 {
-            PROJECT_STATUS_PARTIAL
-        } else {
-            PROJECT_STATUS_READY
-        };
-        let reason_code = if has_blockers {
-            SYNC_REASON_BLOCKED_BY_BLOCKERS
-        } else if resources == 0 {
-            SYNC_REASON_PARTIAL_NO_DATA
-        } else {
-            SYNC_REASON_READY
-        };
-        (resources, status, reason_code, next_actions)
-    } else {
-        let resources = inputs
-            .summary_document
-            .map(|document| summary_number(document, summary_key::RESOURCE_COUNT))
-            .unwrap_or(0);
-        signal_keys.extend(
-            SYNC_SIGNAL_KEYS_SUMMARY
-                .iter()
-                .map(|item| (*item).to_string()),
-        );
+            let resources = self
+                .summary_document
+                .map(|document| summary_number(document, summary_key::RESOURCE_COUNT))
+                .unwrap_or(0);
+            signal_keys.extend(
+                SYNC_SIGNAL_KEYS_SUMMARY
+                    .iter()
+                    .map(|item| (*item).to_string()),
+            );
 
-        let next_actions = next_actions_for_partial(resources, false);
-        let reason_code = if resources == 0 {
-            SYNC_REASON_PARTIAL_NO_DATA
-        } else {
-            SYNC_REASON_PARTIAL_MISSING_SURFACES
+            let next_actions = next_actions_for_partial(resources, false);
+            let reason_code = if resources == 0 {
+                SYNC_REASON_PARTIAL_NO_DATA
+            } else {
+                SYNC_REASON_PARTIAL_MISSING_SURFACES
+            };
+            (resources, PROJECT_STATUS_PARTIAL, reason_code, next_actions)
         };
-        (resources, PROJECT_STATUS_PARTIAL, reason_code, next_actions)
-    };
 
-    Some(
-        StatusReading {
+        Some(StatusReading {
             id: SYNC_DOMAIN_ID.to_string(),
             scope: SYNC_SCOPE.to_string(),
             mode: SYNC_MODE.to_string(),
@@ -276,7 +282,6 @@ pub(crate) fn build_live_sync_domain_status(
             warnings: warnings.into_iter().map(Into::into).collect(),
             next_actions,
             freshness: Default::default(),
-        }
-        .into_project_domain_status(),
-    )
+        })
+    }
 }

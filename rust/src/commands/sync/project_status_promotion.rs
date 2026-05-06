@@ -12,7 +12,7 @@ use crate::project_status::{
     status_finding, ProjectDomainStatus, PROJECT_STATUS_BLOCKED, PROJECT_STATUS_PARTIAL,
     PROJECT_STATUS_READY,
 };
-use crate::project_status_model::StatusReading;
+use crate::project_status_model::{StatusProducer, StatusReading};
 
 use super::project_status_json::{
     push_unique, section_bool, section_number, section_object, section_text, summary_number,
@@ -146,6 +146,11 @@ const PROMOTION_REVIEW_FOLDER_REMAPS_ACTIONS: &[&str] =
 const PROMOTION_REVIEW_DATASOURCE_REMAPS_ACTIONS: &[&str] =
     &["review datasource remaps before promotion review"];
 
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct PromotionDomainStatusInputs<'a> {
+    pub promotion_preflight_document: Option<&'a Value>,
+}
+
 fn handoff_warning_source(document: Option<&Value>) -> &'static str {
     if section_bool(document, section::HANDOFF, handoff_key::READY_FOR_REVIEW)
         && section_text(document, section::HANDOFF, handoff_key::REVIEW_INSTRUCTION).is_none()
@@ -219,194 +224,201 @@ fn continuation_warning_count(document: Option<&Value>) -> usize {
 pub(crate) fn build_promotion_domain_status(
     promotion_preflight_document: Option<&Value>,
 ) -> Option<ProjectDomainStatus> {
-    let document = promotion_preflight_document?;
-    let resources = summary_number(document, summary_key::RESOURCE_COUNT);
-    let missing_mappings = summary_number(document, summary_key::MISSING_MAPPING_COUNT);
-    let bundle_blocking = summary_number(document, summary_key::BUNDLE_BLOCKING_COUNT);
-    let summary_blocking = summary_number(document, summary_key::BLOCKING_COUNT);
-    let handoff_blocking = section_number(
-        Some(document),
-        section::HANDOFF,
-        handoff_key::BLOCKING_COUNT,
-    );
-    let continuation_blocking = section_number(
-        Some(document),
-        section::CONTINUATION,
-        continuation_key::BLOCKING_COUNT,
-    );
-    let blocking = summary_blocking
-        .max(handoff_blocking)
-        .max(continuation_blocking);
-    let blocking_source = if summary_blocking > 0 {
-        signal::SUMMARY_BLOCKING_COUNT
-    } else if handoff_blocking > 0 {
-        signal::HANDOFF_BLOCKING_COUNT
-    } else {
-        signal::CONTINUATION_BLOCKING_COUNT
-    };
+    PromotionDomainStatusInputs {
+        promotion_preflight_document,
+    }
+    .project_domain_status()
+}
 
-    let mut blockers = Vec::new();
-    if missing_mappings > 0 {
-        blockers.push(status_finding(
-            PROMOTION_BLOCKER_MISSING_MAPPINGS,
-            missing_mappings,
-            signal::SUMMARY_MISSING_MAPPING_COUNT,
-        ));
-    }
-    if bundle_blocking > 0 {
-        blockers.push(status_finding(
-            PROMOTION_BLOCKER_BUNDLE_BLOCKING,
-            bundle_blocking,
-            signal::SUMMARY_BUNDLE_BLOCKING_COUNT,
-        ));
-    }
-    if blockers.is_empty() && blocking > 0 {
-        blockers.push(status_finding(
-            PROMOTION_BLOCKER_BLOCKING,
-            blocking,
-            blocking_source,
-        ));
-    }
+impl StatusProducer for PromotionDomainStatusInputs<'_> {
+    fn status_reading(self) -> Option<StatusReading> {
+        let document = self.promotion_preflight_document?;
+        let resources = summary_number(document, summary_key::RESOURCE_COUNT);
+        let missing_mappings = summary_number(document, summary_key::MISSING_MAPPING_COUNT);
+        let bundle_blocking = summary_number(document, summary_key::BUNDLE_BLOCKING_COUNT);
+        let summary_blocking = summary_number(document, summary_key::BLOCKING_COUNT);
+        let handoff_blocking = section_number(
+            Some(document),
+            section::HANDOFF,
+            handoff_key::BLOCKING_COUNT,
+        );
+        let continuation_blocking = section_number(
+            Some(document),
+            section::CONTINUATION,
+            continuation_key::BLOCKING_COUNT,
+        );
+        let blocking = summary_blocking
+            .max(handoff_blocking)
+            .max(continuation_blocking);
+        let blocking_source = if summary_blocking > 0 {
+            signal::SUMMARY_BLOCKING_COUNT
+        } else if handoff_blocking > 0 {
+            signal::HANDOFF_BLOCKING_COUNT
+        } else {
+            signal::CONTINUATION_BLOCKING_COUNT
+        };
 
-    let mut signal_keys = PROMOTION_SIGNAL_KEYS
-        .iter()
-        .map(|item| (*item).to_string())
-        .collect::<Vec<_>>();
-    if section_object(Some(document), section::HANDOFF).is_some() {
-        signal_keys.extend(
-            PROMOTION_HANDOFF_SIGNAL_KEYS
-                .iter()
-                .map(|item| (*item).to_string()),
-        );
-    }
-    if section_object(Some(document), section::CONTINUATION).is_some() {
-        signal_keys.extend(
-            PROMOTION_CONTINUATION_SIGNAL_KEYS
-                .iter()
-                .map(|item| (*item).to_string()),
-        );
-    }
-    if section_object(Some(document), section::CHECK_SUMMARY).is_some() {
-        signal_keys.extend(
-            PROMOTION_CHECK_SUMMARY_SIGNAL_KEYS
-                .iter()
-                .map(|item| (*item).to_string()),
-        );
-    }
-
-    let has_blockers = !blockers.is_empty();
-    let is_partial = resources == 0;
-    let (status, reason_code) = if has_blockers {
-        (PROJECT_STATUS_BLOCKED, PROMOTION_REASON_BLOCKED_BY_BLOCKERS)
-    } else if is_partial {
-        (PROJECT_STATUS_PARTIAL, PROMOTION_REASON_PARTIAL_NO_DATA)
-    } else {
-        (PROJECT_STATUS_READY, PROMOTION_REASON_READY)
-    };
-    let mut warnings = Vec::new();
-    let folder_remaps = section_number(
-        Some(document),
-        section::CHECK_SUMMARY,
-        check_summary_key::FOLDER_REMAP_COUNT,
-    );
-    let datasource_uid_remaps = section_number(
-        Some(document),
-        section::CHECK_SUMMARY,
-        check_summary_key::DATASOURCE_UID_REMAP_COUNT,
-    );
-    let datasource_name_remaps = section_number(
-        Some(document),
-        section::CHECK_SUMMARY,
-        check_summary_key::DATASOURCE_NAME_REMAP_COUNT,
-    );
-    if folder_remaps > 0 {
-        warnings.push(status_finding(
-            PROMOTION_WARNING_FOLDER_REMAPS,
-            folder_remaps,
-            signal::CHECK_FOLDER_REMAP_COUNT,
-        ));
-    }
-    if datasource_uid_remaps > 0 {
-        warnings.push(status_finding(
-            PROMOTION_WARNING_DATASOURCE_UID_REMAPS,
-            datasource_uid_remaps,
-            signal::CHECK_DATASOURCE_UID_REMAP_COUNT,
-        ));
-    }
-    if datasource_name_remaps > 0 {
-        warnings.push(status_finding(
-            PROMOTION_WARNING_DATASOURCE_NAME_REMAPS,
-            datasource_name_remaps,
-            signal::CHECK_DATASOURCE_NAME_REMAP_COUNT,
-        ));
-    }
-    let next_actions = if has_blockers {
-        PROMOTION_RESOLVE_BLOCKERS_ACTIONS
-            .iter()
-            .map(|item| (*item).to_string())
-            .collect::<Vec<_>>()
-    } else if is_partial {
-        PROMOTION_STAGE_AT_LEAST_ONE_ACTIONS
-            .iter()
-            .map(|item| (*item).to_string())
-            .collect::<Vec<_>>()
-    } else {
-        let mut actions = Vec::new();
-        if section_object(Some(document), section::HANDOFF).is_some() {
-            warnings.push(status_finding(
-                PROMOTION_WARNING_REVIEW_HANDOFF,
-                1,
-                handoff_warning_source(Some(document)),
+        let mut blockers = Vec::new();
+        if missing_mappings > 0 {
+            blockers.push(status_finding(
+                PROMOTION_BLOCKER_MISSING_MAPPINGS,
+                missing_mappings,
+                signal::SUMMARY_MISSING_MAPPING_COUNT,
             ));
-            let action = if section_bool(
-                Some(document),
-                section::HANDOFF,
-                handoff_key::READY_FOR_REVIEW,
-            ) {
-                PROMOTION_REVIEW_READY_ACTIONS[0].to_string()
-            } else {
-                section_text(
-                    Some(document),
-                    section::HANDOFF,
-                    handoff_key::REVIEW_INSTRUCTION,
-                )
-                .unwrap_or_else(|| PROMOTION_REVIEW_HANDOFF_ACTIONS[0].to_string())
-            };
-            push_unique(&mut actions, &action);
         }
-        if folder_remaps > 0 {
-            push_unique(&mut actions, PROMOTION_REVIEW_FOLDER_REMAPS_ACTIONS[0]);
+        if bundle_blocking > 0 {
+            blockers.push(status_finding(
+                PROMOTION_BLOCKER_BUNDLE_BLOCKING,
+                bundle_blocking,
+                signal::SUMMARY_BUNDLE_BLOCKING_COUNT,
+            ));
         }
-        if datasource_uid_remaps > 0 || datasource_name_remaps > 0 {
-            push_unique(&mut actions, PROMOTION_REVIEW_DATASOURCE_REMAPS_ACTIONS[0]);
+        if blockers.is_empty() && blocking > 0 {
+            blockers.push(status_finding(
+                PROMOTION_BLOCKER_BLOCKING,
+                blocking,
+                blocking_source,
+            ));
+        }
+
+        let mut signal_keys = PROMOTION_SIGNAL_KEYS
+            .iter()
+            .map(|item| (*item).to_string())
+            .collect::<Vec<_>>();
+        if section_object(Some(document), section::HANDOFF).is_some() {
+            signal_keys.extend(
+                PROMOTION_HANDOFF_SIGNAL_KEYS
+                    .iter()
+                    .map(|item| (*item).to_string()),
+            );
         }
         if section_object(Some(document), section::CONTINUATION).is_some() {
+            signal_keys.extend(
+                PROMOTION_CONTINUATION_SIGNAL_KEYS
+                    .iter()
+                    .map(|item| (*item).to_string()),
+            );
+        }
+        if section_object(Some(document), section::CHECK_SUMMARY).is_some() {
+            signal_keys.extend(
+                PROMOTION_CHECK_SUMMARY_SIGNAL_KEYS
+                    .iter()
+                    .map(|item| (*item).to_string()),
+            );
+        }
+
+        let has_blockers = !blockers.is_empty();
+        let is_partial = resources == 0;
+        let (status, reason_code) = if has_blockers {
+            (PROJECT_STATUS_BLOCKED, PROMOTION_REASON_BLOCKED_BY_BLOCKERS)
+        } else if is_partial {
+            (PROJECT_STATUS_PARTIAL, PROMOTION_REASON_PARTIAL_NO_DATA)
+        } else {
+            (PROJECT_STATUS_READY, PROMOTION_REASON_READY)
+        };
+        let mut warnings = Vec::new();
+        let folder_remaps = section_number(
+            Some(document),
+            section::CHECK_SUMMARY,
+            check_summary_key::FOLDER_REMAP_COUNT,
+        );
+        let datasource_uid_remaps = section_number(
+            Some(document),
+            section::CHECK_SUMMARY,
+            check_summary_key::DATASOURCE_UID_REMAP_COUNT,
+        );
+        let datasource_name_remaps = section_number(
+            Some(document),
+            section::CHECK_SUMMARY,
+            check_summary_key::DATASOURCE_NAME_REMAP_COUNT,
+        );
+        if folder_remaps > 0 {
             warnings.push(status_finding(
-                PROMOTION_WARNING_APPLY_CONTINUATION,
-                continuation_warning_count(Some(document)),
-                continuation_warning_source(Some(document)),
+                PROMOTION_WARNING_FOLDER_REMAPS,
+                folder_remaps,
+                signal::CHECK_FOLDER_REMAP_COUNT,
             ));
-            let action = if section_bool(
-                Some(document),
-                section::CONTINUATION,
-                continuation_key::READY_FOR_CONTINUATION,
-            ) {
-                PROMOTION_APPLY_READY_ACTIONS[0].to_string()
-            } else {
-                section_text(
+        }
+        if datasource_uid_remaps > 0 {
+            warnings.push(status_finding(
+                PROMOTION_WARNING_DATASOURCE_UID_REMAPS,
+                datasource_uid_remaps,
+                signal::CHECK_DATASOURCE_UID_REMAP_COUNT,
+            ));
+        }
+        if datasource_name_remaps > 0 {
+            warnings.push(status_finding(
+                PROMOTION_WARNING_DATASOURCE_NAME_REMAPS,
+                datasource_name_remaps,
+                signal::CHECK_DATASOURCE_NAME_REMAP_COUNT,
+            ));
+        }
+        let next_actions = if has_blockers {
+            PROMOTION_RESOLVE_BLOCKERS_ACTIONS
+                .iter()
+                .map(|item| (*item).to_string())
+                .collect::<Vec<_>>()
+        } else if is_partial {
+            PROMOTION_STAGE_AT_LEAST_ONE_ACTIONS
+                .iter()
+                .map(|item| (*item).to_string())
+                .collect::<Vec<_>>()
+        } else {
+            let mut actions = Vec::new();
+            if section_object(Some(document), section::HANDOFF).is_some() {
+                warnings.push(status_finding(
+                    PROMOTION_WARNING_REVIEW_HANDOFF,
+                    1,
+                    handoff_warning_source(Some(document)),
+                ));
+                let action = if section_bool(
+                    Some(document),
+                    section::HANDOFF,
+                    handoff_key::READY_FOR_REVIEW,
+                ) {
+                    PROMOTION_REVIEW_READY_ACTIONS[0].to_string()
+                } else {
+                    section_text(
+                        Some(document),
+                        section::HANDOFF,
+                        handoff_key::REVIEW_INSTRUCTION,
+                    )
+                    .unwrap_or_else(|| PROMOTION_REVIEW_HANDOFF_ACTIONS[0].to_string())
+                };
+                push_unique(&mut actions, &action);
+            }
+            if folder_remaps > 0 {
+                push_unique(&mut actions, PROMOTION_REVIEW_FOLDER_REMAPS_ACTIONS[0]);
+            }
+            if datasource_uid_remaps > 0 || datasource_name_remaps > 0 {
+                push_unique(&mut actions, PROMOTION_REVIEW_DATASOURCE_REMAPS_ACTIONS[0]);
+            }
+            if section_object(Some(document), section::CONTINUATION).is_some() {
+                warnings.push(status_finding(
+                    PROMOTION_WARNING_APPLY_CONTINUATION,
+                    continuation_warning_count(Some(document)),
+                    continuation_warning_source(Some(document)),
+                ));
+                let action = if section_bool(
                     Some(document),
                     section::CONTINUATION,
-                    continuation_key::INSTRUCTION,
-                )
-                .unwrap_or_else(|| PROMOTION_APPLY_CONTINUATION_ACTIONS[0].to_string())
-            };
-            push_unique(&mut actions, &action);
-        }
-        actions
-    };
+                    continuation_key::READY_FOR_CONTINUATION,
+                ) {
+                    PROMOTION_APPLY_READY_ACTIONS[0].to_string()
+                } else {
+                    section_text(
+                        Some(document),
+                        section::CONTINUATION,
+                        continuation_key::INSTRUCTION,
+                    )
+                    .unwrap_or_else(|| PROMOTION_APPLY_CONTINUATION_ACTIONS[0].to_string())
+                };
+                push_unique(&mut actions, &action);
+            }
+            actions
+        };
 
-    Some(
-        StatusReading {
+        Some(StatusReading {
             id: PROMOTION_DOMAIN_ID.to_string(),
             scope: PROMOTION_SCOPE.to_string(),
             mode: PROMOTION_MODE.to_string(),
@@ -422,7 +434,6 @@ pub(crate) fn build_promotion_domain_status(
             warnings: warnings.into_iter().map(Into::into).collect(),
             next_actions,
             freshness: Default::default(),
-        }
-        .into_project_domain_status(),
-    )
+        })
+    }
 }
