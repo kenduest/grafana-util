@@ -2,7 +2,7 @@
 //! Covers live flag parsing and request-backed fetch/apply helpers.
 use super::live::{
     execute_live_apply_with_request, fetch_live_availability_with_request,
-    fetch_live_resource_specs_with_request, load_apply_intent_operations,
+    fetch_live_resource_specs_with_request, load_apply_intent_operations, merge_availability,
 };
 use super::{build_sync_apply_intent_document, SyncAdvancedCommand, SyncCliArgs, SyncGroupCommand};
 use clap::Parser;
@@ -310,6 +310,27 @@ fn fetch_live_availability_with_request_collects_contact_points_and_plugins() {
         availability["contactPoints"],
         json!(["pagerduty-primary", "cp-1"])
     );
+}
+
+#[test]
+fn merge_availability_deduplicates_arrays_and_overwrites_scalar_fields() {
+    let merged = merge_availability(
+        Some(json!({
+            "datasourceUids": ["prom-main"],
+            "pluginIds": ["prometheus"],
+            "source": "staged"
+        })),
+        &json!({
+            "datasourceUids": ["prom-main", "loki-main"],
+            "pluginIds": ["loki"],
+            "source": "live"
+        }),
+    )
+    .unwrap();
+
+    assert_eq!(merged["datasourceUids"], json!(["prom-main", "loki-main"]));
+    assert_eq!(merged["pluginIds"], json!(["prometheus", "loki"]));
+    assert_eq!(merged["source"], json!("live"));
 }
 
 #[test]

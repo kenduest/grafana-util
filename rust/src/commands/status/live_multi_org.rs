@@ -64,74 +64,95 @@ pub(super) fn build_scoped_live_org_clients(
 }
 
 fn merge_live_domain_statuses(statuses: Vec<ProjectDomainStatus>) -> Result<ProjectDomainStatus> {
-    let aggregate = statuses
+    let freshness = build_live_overall_freshness(&statuses);
+    let aggregate_index = statuses
         .iter()
-        .min_by_key(|status| {
+        .enumerate()
+        .min_by_key(|(_, status)| {
             (
                 project_status_severity_rank(&status.status),
                 usize::MAX - status.blocker_count,
                 usize::MAX - status.warning_count,
             )
         })
+        .map(|(index, _)| index)
         .ok_or_else(|| message("Expected at least one per-org domain status to aggregate."))?;
-    let blockers = merge_status_record_counts(
-        statuses
-            .iter()
-            .flat_map(|status| status.blockers.iter().cloned().map(StatusRecordCount::from)),
-    );
-    let warnings = merge_status_record_counts(
-        statuses
-            .iter()
-            .flat_map(|status| status.warnings.iter().cloned().map(StatusRecordCount::from)),
-    );
-    let freshness = build_live_overall_freshness(&statuses);
-    let reason_code = if statuses
+    let all_same_reason_code = statuses
         .iter()
-        .all(|status| status.reason_code == aggregate.reason_code)
-    {
-        aggregate.reason_code.clone()
+        .all(|status| status.reason_code == statuses[aggregate_index].reason_code);
+    let all_same_mode = statuses
+        .iter()
+        .all(|status| status.mode == statuses[aggregate_index].mode);
+    let mut primary_count = 0usize;
+    let mut source_kinds = BTreeSet::new();
+    let mut signal_keys = BTreeSet::new();
+    let mut blocker_records = Vec::<StatusRecordCount>::new();
+    let mut warning_records = Vec::<StatusRecordCount>::new();
+    let mut next_actions = Vec::<String>::new();
+    let mut aggregate = None;
+
+    for (index, status) in statuses.into_iter().enumerate() {
+        let ProjectDomainStatus {
+            id,
+            scope,
+            mode,
+            status,
+            reason_code,
+            primary_count: status_primary_count,
+            blocker_count: _,
+            warning_count: _,
+            source_kinds: status_source_kinds,
+            signal_keys: status_signal_keys,
+            blockers: status_blockers,
+            warnings: status_warnings,
+            next_actions: status_next_actions,
+            freshness: _,
+        } = status;
+
+        primary_count += status_primary_count;
+        source_kinds.extend(status_source_kinds);
+        signal_keys.extend(status_signal_keys);
+        blocker_records.extend(status_blockers.into_iter().map(StatusRecordCount::from));
+        warning_records.extend(status_warnings.into_iter().map(StatusRecordCount::from));
+        for action in status_next_actions {
+            if !next_actions.iter().any(|existing| existing == &action) {
+                next_actions.push(action);
+            }
+        }
+
+        if index == aggregate_index {
+            aggregate = Some((id, scope, mode, status, reason_code));
+        }
+    }
+
+    let (id, scope, aggregate_mode, aggregate_status, aggregate_reason_code) =
+        aggregate.ok_or_else(|| message("Expected aggregate domain status to be available."))?;
+
+    let blockers = merge_status_record_counts(blocker_records);
+    let warnings = merge_status_record_counts(warning_records);
+    let reason_code = if all_same_reason_code {
+        aggregate_reason_code
     } else {
         PROJECT_STATUS_LIVE_ALL_ORGS_AGGREGATE.to_string()
     };
-    let mode = if statuses.iter().all(|status| status.mode == aggregate.mode) {
+    let mode = if all_same_mode {
         format!(
             "{}{}",
-            aggregate.mode, PROJECT_STATUS_LIVE_ALL_ORGS_MODE_SUFFIX
+            aggregate_mode, PROJECT_STATUS_LIVE_ALL_ORGS_MODE_SUFFIX
         )
     } else {
         PROJECT_STATUS_LIVE_ALL_ORGS_AGGREGATE.to_string()
     };
-    let source_kinds = statuses
-        .iter()
-        .flat_map(|status| status.source_kinds.iter().cloned())
-        .collect::<BTreeSet<_>>()
-        .into_iter()
-        .collect::<Vec<_>>();
-    let signal_keys = statuses
-        .iter()
-        .flat_map(|status| status.signal_keys.iter().cloned())
-        .collect::<BTreeSet<_>>()
-        .into_iter()
-        .collect::<Vec<_>>();
-    let next_actions = statuses
-        .iter()
-        .flat_map(|status| status.next_actions.iter().cloned())
-        .fold(Vec::<String>::new(), |mut acc, item| {
-            if !acc.iter().any(|existing| existing == &item) {
-                acc.push(item);
-            }
-            acc
-        });
 
     Ok(StatusReading {
-        id: aggregate.id.clone(),
-        scope: aggregate.scope.clone(),
+        id,
+        scope,
         mode,
-        status: aggregate.status.clone(),
+        status: aggregate_status,
         reason_code,
-        primary_count: statuses.iter().map(|status| status.primary_count).sum(),
-        source_kinds,
-        signal_keys,
+        primary_count,
+        source_kinds: source_kinds.into_iter().collect(),
+        signal_keys: signal_keys.into_iter().collect(),
         blockers,
         warnings,
         next_actions,

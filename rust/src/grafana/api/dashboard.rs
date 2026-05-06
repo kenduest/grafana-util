@@ -75,14 +75,20 @@ impl<'a> DashboardResourceClient<'a> {
 
             let batch_len = batch.len();
             for item in batch {
-                let object =
-                    value_as_object(&item, "Unexpected dashboard summary payload from Grafana.")?;
-                let uid = string_field(object, "uid", "");
+                let object = match item {
+                    Value::Object(object) => object,
+                    _ => {
+                        return Err(message(
+                            "Unexpected dashboard summary payload from Grafana.",
+                        ));
+                    }
+                };
+                let uid = string_field(&object, "uid", "");
                 if uid.is_empty() || seen_uids.contains(&uid) {
                     continue;
                 }
                 seen_uids.insert(uid);
-                dashboards.push(object.clone());
+                dashboards.push(object);
             }
 
             if batch_len < page_size {
@@ -96,11 +102,8 @@ impl<'a> DashboardResourceClient<'a> {
 
     pub(crate) fn fetch_current_org(&self) -> Result<Map<String, Value>> {
         match self.request_json(Method::GET, "/api/org", &[], None)? {
-            Some(value) => {
-                let object =
-                    value_as_object(&value, "Unexpected current-org payload from Grafana.")?;
-                Ok(object.clone())
-            }
+            Some(Value::Object(object)) => Ok(object),
+            Some(_) => Err(message("Unexpected current-org payload from Grafana.")),
             None => Err(message("Grafana did not return current-org metadata.")),
         }
     }
@@ -114,11 +117,8 @@ impl<'a> DashboardResourceClient<'a> {
 
     pub(crate) fn fetch_folder_if_exists(&self, uid: &str) -> Result<Option<Map<String, Value>>> {
         match self.request_json(Method::GET, &format!("/api/folders/{uid}"), &[], None) {
-            Ok(Some(value)) => {
-                let object =
-                    value_as_object(&value, &format!("Unexpected folder payload for UID {uid}."))?;
-                Ok(Some(object.clone()))
-            }
+            Ok(Some(Value::Object(object))) => Ok(Some(object)),
+            Ok(Some(_)) => Err(message(format!("Unexpected folder payload for UID {uid}."))),
             Ok(None) => Ok(None),
             Err(error) if error.status_code() == Some(404) => Ok(None),
             Err(error) => Err(error),
@@ -224,13 +224,10 @@ impl<'a> DashboardResourceClient<'a> {
             &[],
             Some(&Value::Object(payload)),
         )? {
-            Some(value) => {
-                let object = value_as_object(
-                    &value,
-                    &format!("Unexpected folder create response for UID {uid}."),
-                )?;
-                Ok(object.clone())
-            }
+            Some(Value::Object(object)) => Ok(object),
+            Some(_) => Err(message(format!(
+                "Unexpected folder create response for UID {uid}."
+            ))),
             None => Err(message(format!(
                 "Unexpected empty folder create response for UID {uid}."
             ))),
@@ -249,13 +246,10 @@ impl<'a> DashboardResourceClient<'a> {
             &[],
             Some(&Value::Object(payload.clone())),
         )? {
-            Some(value) => {
-                let object = value_as_object(
-                    &value,
-                    &format!("Unexpected folder update response for UID {uid}."),
-                )?;
-                Ok(object.clone())
-            }
+            Some(Value::Object(object)) => Ok(object),
+            Some(_) => Err(message(format!(
+                "Unexpected folder update response for UID {uid}."
+            ))),
             None => Err(message(format!(
                 "Unexpected empty folder update response for UID {uid}."
             ))),
@@ -277,13 +271,10 @@ impl<'a> DashboardResourceClient<'a> {
     pub(crate) fn delete_dashboard_request(&self, uid: &str) -> Result<Map<String, Value>> {
         let path = format!("/api/dashboards/uid/{uid}");
         match self.request_json(Method::DELETE, &path, &[], None)? {
-            Some(value) => {
-                let object = value_as_object(
-                    &value,
-                    &format!("Unexpected dashboard delete response for UID {uid}."),
-                )?;
-                Ok(object.clone())
-            }
+            Some(Value::Object(object)) => Ok(object),
+            Some(_) => Err(message(format!(
+                "Unexpected dashboard delete response for UID {uid}."
+            ))),
             None => Err(message(format!(
                 "Unexpected empty dashboard delete response for UID {uid}."
             ))),
@@ -293,13 +284,10 @@ impl<'a> DashboardResourceClient<'a> {
     pub(crate) fn delete_folder_request(&self, uid: &str) -> Result<Map<String, Value>> {
         let path = format!("/api/folders/{uid}");
         match self.request_json(Method::DELETE, &path, &[], None)? {
-            Some(value) => {
-                let object = value_as_object(
-                    &value,
-                    &format!("Unexpected folder delete response for UID {uid}."),
-                )?;
-                Ok(object.clone())
-            }
+            Some(Value::Object(object)) => Ok(object),
+            Some(_) => Err(message(format!(
+                "Unexpected folder delete response for UID {uid}."
+            ))),
             None => Err(message(format!(
                 "Unexpected empty folder delete response for UID {uid}."
             ))),
@@ -323,15 +311,14 @@ impl<'a> DashboardResourceClient<'a> {
             .request_json(Method::GET, &path, &params, None)
             .ok()
             .flatten()?;
-        let versions = match response {
-            Value::Array(items) => items,
+        let versions = match &response {
+            Value::Array(items) => Some(items.as_slice()),
             Value::Object(object) => object
                 .get("versions")
                 .and_then(Value::as_array)
-                .cloned()
-                .unwrap_or_default(),
-            _ => Vec::new(),
-        };
+                .map(Vec::as_slice),
+            _ => None,
+        }?;
         versions
             .first()
             .and_then(Value::as_object)

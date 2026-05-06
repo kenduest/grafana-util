@@ -149,10 +149,37 @@ where
         None,
     )? {
         Some(Value::Array(contact_points)) => {
-            availability::append_contact_point_identifiers_from_values(
-                &contact_points,
-                &mut availability,
-            )?;
+            let mut names = Vec::new();
+            for contact_point in contact_points {
+                let contact_point = match contact_point {
+                    Value::Object(contact_point) => contact_point,
+                    _ => {
+                        return Err(message(
+                            "Unexpected contact-point list response from Grafana.",
+                        ))
+                    }
+                };
+                if let Some(name) = contact_point
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .map(str::trim)
+                    .filter(|value: &&str| !value.is_empty())
+                {
+                    names.push(name.to_string());
+                }
+                if let Some(uid) = contact_point
+                    .get("uid")
+                    .and_then(Value::as_str)
+                    .map(str::trim)
+                    .filter(|value: &&str| !value.is_empty())
+                {
+                    names.push(uid.to_string());
+                }
+            }
+            crate::sync::append_unique_strings(
+                availability::array_mut(&mut availability, super::availability_key::CONTACT_POINTS),
+                &names,
+            );
         }
         Some(_) => {
             return Err(message(

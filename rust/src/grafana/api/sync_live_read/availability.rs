@@ -1,11 +1,7 @@
 use serde_json::{Map, Value};
 
 use super::super::availability_key;
-#[cfg(test)]
-use crate::common::Result;
 use crate::sync::append_unique_strings;
-#[cfg(test)]
-use crate::sync::require_json_object;
 
 pub(super) fn empty_document() -> Map<String, Value> {
     Map::from_iter(vec![
@@ -110,17 +106,4 @@ pub(super) fn append_contact_point_identifiers<'a, I>(
         array_mut(availability, availability_key::CONTACT_POINTS),
         &names,
     );
-}
-
-#[cfg(test)]
-pub(super) fn append_contact_point_identifiers_from_values(
-    contact_points: &[Value],
-    availability: &mut Map<String, Value>,
-) -> Result<()> {
-    let mut objects = Vec::with_capacity(contact_points.len());
-    for contact_point in contact_points {
-        objects.push(require_json_object(contact_point, "Grafana contact-point payload")?.clone());
-    }
-    append_contact_point_identifiers(objects.iter(), availability);
-    Ok(())
 }

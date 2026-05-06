@@ -366,10 +366,12 @@ Relevant areas:
 Action:
 
 - [x] Keep write/apply paths serial unless dependency ordering and Grafana API safety are explicitly modeled.
-- [ ] Reduce `serde_json::Value` cloning only at proven hot spots; dashboard
+- [x] Reduce `serde_json::Value` cloning only at proven hot spots; dashboard
   live-read detail normalization now moves the fetched dashboard body instead
-  of deep-cloning it, while flexible JSON handling remains for version-varying
-  Grafana API shapes.
+  of deep-cloning it, dashboard API response normalizers now consume owned
+  response objects, sync availability merges move owned arrays, and live
+  multi-org status aggregation consumes per-org status rows while flexible JSON
+  handling remains for version-varying Grafana API shapes.
 
 Validation:
 

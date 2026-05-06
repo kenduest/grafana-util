@@ -68,7 +68,10 @@ pub(crate) fn merge_availability(base: Option<Value>, extra: &Value) -> Result<V
         if availability_key::MERGE_ARRAY_KEYS.contains(&key.as_str()) {
             let existing = merged
                 .remove(key)
-                .and_then(|item| item.as_array().cloned())
+                .and_then(|item| match item {
+                    Value::Array(items) => Some(items),
+                    _ => None,
+                })
                 .unwrap_or_default();
             let mut combined = existing;
             let extra_items = value

@@ -19,6 +19,14 @@ Current AI-maintained status only.
 - Older entries moved to [`ai-status-archive-2026-04-26.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-26.md).
 - Older entries moved to [`ai-status-archive-2026-04-27.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-27.md).
 - Older entries moved to [`ai-status-archive-2026-04-28.md`](/Users/kendlee/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-04-28.md).
+- Older entries moved to [`ai-status-archive-2026-05-02.md`](/Users/ken/work/grafana-utils/docs/internal/archive/ai-status-archive-2026-05-02.md).
+
+## 2026-05-02 - Reduce proven JSON clone hot spots
+- State: Done
+- Scope: Rust dashboard API response normalization, sync live availability merge, status multi-org aggregation, focused regression tests, full Rust validation, TODO trace, and AI workflow validation. Public JSON, CLI behavior, live transport semantics, and Python implementation are out of scope.
+- Baseline: Several read/aggregation paths owned `serde_json::Value` or domain status rows but borrowed them and cloned maps, arrays, or status fields back out during normalization.
+- Current Update: Consumed owned dashboard response objects, moved existing sync availability arrays, extracted request-backed contact-point identifiers without whole-object clones, and merged live multi-org domain statuses by consuming per-org rows.
+- Result: Focused dashboard/sync/status tests and full Rust validation pass.
 
 ## 2026-04-28 - Normalize status producers
 - State: Done
@@ -54,10 +62,3 @@ Current AI-maintained status only.
 - Baseline: Directory-based dashboard flows skipped `permissions.json`, but single-object dashboard flows could still treat dashboard permission artifacts as dashboard JSON.
 - Current Update: Rejected dashboard permission bundle/export artifacts in the shared dashboard object extractor, wired the inventory regression module into the Rust suite, and added sync/access tests proving permission bundles stay out of dashboard source and access-bundle collection.
 - Result: Focused dashboard, raw-to-prompt, sync bundle, and access plan tests pass.
-
-## 2026-04-27 - Guard Git Sync dashboard live apply boundaries
-- State: Done
-- Scope: Rust dashboard browse local-mode routing, sync apply-intent/live-apply regressions, focused tests, and TODO trace. Public JSON, generated docs, Python implementation, and Git repository/PR automation are out of scope.
-- Baseline: Sync live apply already blocked file-provisioned and Git Sync-owned dashboards, but workspace-backed dashboard browse trees did not share the same local-mode detection as explicit `--input-dir` local browse trees.
-- Current Update: Centralized dashboard browse local-source detection so `--workspace` Git Sync review trees use read-only local mode, and added sync regressions proving Git Sync dashboard ownership survives apply-intent handoff and blocks live transport.
-- Result: Focused browse, sync apply-intent, live-apply, and reusable-output tests pass.
