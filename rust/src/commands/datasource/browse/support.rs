@@ -100,7 +100,7 @@ pub(crate) fn detail_lines(item: &DatasourceBrowseItem) -> Vec<String> {
     }
     if let Some(json_data) = item.details.get("jsonData").and_then(Value::as_object) {
         if !json_data.is_empty() {
-            let keys = json_data.keys().cloned().collect::<Vec<_>>().join(", ");
+            let keys = sorted_object_keys(json_data).join(", ");
             lines.push(format!("jsonData keys: {keys}"));
         }
     }
@@ -110,11 +110,7 @@ pub(crate) fn detail_lines(item: &DatasourceBrowseItem) -> Vec<String> {
         .and_then(Value::as_object)
     {
         if !secure_json_fields.is_empty() {
-            let keys = secure_json_fields
-                .keys()
-                .cloned()
-                .collect::<Vec<_>>()
-                .join(", ");
+            let keys = sorted_object_keys(secure_json_fields).join(", ");
             lines.push(format!("secureJsonFields: {keys}"));
         }
     }
@@ -178,12 +174,8 @@ fn placeholder_review_lines(placeholders: &Map<String, Value>) -> Vec<String> {
 fn live_secure_json_fields_review_lines(secure_json_fields: &Map<String, Value>) -> Vec<String> {
     let field_names = secure_json_fields
         .iter()
-        .filter_map(|(field_name, value)| {
-            value
-                .as_bool()
-                .unwrap_or(false)
-                .then(|| field_name.to_string())
-        })
+        .filter(|&(_, value)| value.as_bool().unwrap_or(false))
+        .map(|(field_name, _)| field_name.to_string())
         .collect::<Vec<_>>();
     if field_names.is_empty() {
         return Vec::new();
@@ -315,8 +307,8 @@ fn load_all_orgs_document(
         let datasource_items = datasource_rows_for_org(&scoped_client, &org_name, &org_id_text, 1)?;
         datasource_count += datasource_items.len();
         items.push(org_row(
-            org_name.clone(),
-            org_id_text.clone(),
+            org_name,
+            org_id_text,
             datasource_items.len(),
             org.clone(),
         ));
@@ -466,6 +458,32 @@ mod tests {
                 .to_string()
         ));
         assert!(lines.contains(&"Secret review required: true (secure fields present)".to_string()));
+    }
+
+    #[test]
+    fn detail_lines_sort_json_data_and_secure_json_field_keys() {
+        let item = datasource_item(
+            json!({
+                "jsonData": {
+                    "zulu": true,
+                    "alpha": true
+                },
+                "secureJsonFields": {
+                    "httpHeaderValue1": true,
+                    "basicAuthPassword": true
+                }
+            })
+            .as_object()
+            .unwrap()
+            .clone(),
+        );
+
+        let lines = detail_lines(&item);
+
+        assert!(lines.contains(&"jsonData keys: alpha, zulu".to_string()));
+        assert!(
+            lines.contains(&"secureJsonFields: basicAuthPassword, httpHeaderValue1".to_string())
+        );
     }
 
     #[test]

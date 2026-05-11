@@ -27,6 +27,32 @@ require_tool() {
   fi
 }
 
+require_rust_target() {
+  if ! rustup target list --installed | grep -qx "${TARGET_TRIPLE}"; then
+    cat >&2 <<EOF
+Error: Rust target ${TARGET_TRIPLE} is not installed.
+
+Install it with:
+  rustup target add ${TARGET_TRIPLE}
+
+On macOS with Homebrew rustup, ensure PATH includes:
+  export PATH="\$HOME/.cargo/bin:/opt/homebrew/opt/rustup/bin:\$PATH"
+EOF
+    exit 1
+  fi
+}
+
+configure_zig_cache() {
+  local cache_root
+
+  cache_root="${TMPDIR:-/tmp}/grafana-utils-zig-cache"
+  export CARGO_ZIGBUILD_CACHE_DIR="${CARGO_ZIGBUILD_CACHE_DIR:-${cache_root}/cargo-zigbuild}"
+  export ZIG_LOCAL_CACHE_DIR="${ZIG_LOCAL_CACHE_DIR:-${cache_root}/local}"
+  export ZIG_GLOBAL_CACHE_DIR="${ZIG_GLOBAL_CACHE_DIR:-${cache_root}/global}"
+
+  mkdir -p "${CARGO_ZIGBUILD_CACHE_DIR}" "${ZIG_LOCAL_CACHE_DIR}" "${ZIG_GLOBAL_CACHE_DIR}"
+}
+
 resolve_output_dir() {
   if [[ "${BUILD_BROWSER}" != "0" ]]; then
     printf '%s\n' "${REPO_ROOT}/dist/linux-amd64-browser"
@@ -107,11 +133,14 @@ main() {
   local flavor_label
 
   require_tool "zig" "non-Docker Linux amd64 Rust builds"
+  require_tool "rustup" "non-Docker Linux amd64 Rust builds"
   require_tool "cargo-zigbuild" "non-Docker Linux amd64 Rust builds"
+  require_rust_target
 
   output_dir="$(resolve_output_dir)"
   flavor_label="$(build_flavor_label)"
 
+  configure_zig_cache
   configure_archive_tool
   run_zigbuild
   copy_artifact "${output_dir}"

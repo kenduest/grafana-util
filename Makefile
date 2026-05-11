@@ -212,7 +212,7 @@ build: build-python build-rust
 	@find $(RUST_DIR)/target/release -maxdepth 1 -type f -perm -111 | sort
 
 build-python:
-	$(PYTHON_POETRY_RUN) python -m build --sdist --wheel --no-isolation --outdir ../$(PYTHON_DIST_DIR) .
+	$(PYTHON_POETRY_RUN) pyproject-build --sdist --wheel --no-isolation --outdir ../$(PYTHON_DIST_DIR) .
 	@printf '%s\n' 'Python build outputs:'
 	@find $(PYTHON_DIST_DIR) -maxdepth 1 -type f \( -name '*.whl' -o -name '*.tar.gz' \) | sort
 

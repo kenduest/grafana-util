@@ -642,7 +642,7 @@ fn alert_plan_review_envelope_feeds_shared_summary_rows_without_public_json_drif
         "desired": {"uid": "cp-update"},
         "live": {"uid": "cp-update"}
     });
-    let plan = super::build_alert_plan_document(&[update_row.clone()], false);
+    let plan = super::build_alert_plan_document(std::slice::from_ref(&update_row), false);
     let public_rows_before = plan["rows"].clone();
 
     let envelope = super::alert_runtime_support::build_alert_plan_review_envelope(&plan).unwrap();

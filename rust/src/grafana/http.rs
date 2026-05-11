@@ -85,7 +85,7 @@ impl JsonHttpClient {
         let body = response.bytes()?;
 
         if status.is_client_error() || status.is_server_error() {
-            let body_text = String::from_utf8_lossy(&body).to_string();
+            let body_text = String::from_utf8_lossy(&body).into_owned();
             return Err(api_response(status.as_u16(), url.to_string(), body_text));
         }
 
