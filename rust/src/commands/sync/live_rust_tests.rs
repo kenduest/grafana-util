@@ -233,6 +233,22 @@ fn fetch_live_resource_specs_with_request_collects_alerts_and_alerting_resources
     assert!(specs.iter().any(|item| item["kind"] == "dashboard"));
     assert!(specs.iter().any(|item| item["kind"] == "datasource"));
     assert!(specs.iter().any(|item| item["kind"] == "alert"));
+    assert!(specs.iter().any(|item| {
+        item["kind"] == "alert"
+            && item["uid"] == "cpu-high"
+            && item["managedFields"].as_array().is_some_and(|fields| {
+                [
+                    "condition",
+                    "data",
+                    "folderUID",
+                    "ruleGroup",
+                    "title",
+                    "uid",
+                ]
+                .iter()
+                .all(|field| fields.iter().any(|value| value == field))
+            })
+    }));
     assert!(specs
         .iter()
         .any(|item| item["kind"] == "alert-contact-point" && item["uid"] == "cp-main"));

@@ -170,6 +170,7 @@ fn append_alert_rule_spec(rule: &Map<String, Value>, specs: &mut Vec<Value>) -> 
         "kind": "alert",
         "uid": uid,
         "title": title,
+        "managedFields": normalize_alert_managed_fields(&body),
         "body": body,
     }));
     Ok(())
